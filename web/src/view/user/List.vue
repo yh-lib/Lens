@@ -133,7 +133,7 @@ const updateUserOperation = () =>{
                 <el-button type="primary" @click="addUser">添加</el-button>
             </div>
         </template>
-        <el-table :data="filterTableData" style="width: 100%" border height="75vh" v-loading="loading">
+        <el-table :data="filterTableData" style="width: 100%"  height="70vh" v-loading="loading">
             <el-table-column label="用户名"  prop="username" />
             <el-table-column label="ID"   prop="id" />
             <el-table-column label="QQ号" prop="qq" />
@@ -164,5 +164,6 @@ const updateUserOperation = () =>{
     display: flex;
     justify-content: space-between;
     align-items: center;
+
 }
 </style>

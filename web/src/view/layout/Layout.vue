@@ -9,7 +9,7 @@ import Main from './components/Main.vue';
     <el-container class="el-container">
       <Aside></Aside>
       <el-container class="el-container__el-container">
-        <Header></Header>
+        <Header style="height: 100px;"></Header>
         <Main></Main>
       </el-container>
     </el-container>

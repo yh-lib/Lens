@@ -22,7 +22,7 @@ const getIcon = (iconName) => {
     :style="{width:isCollapse?'65px':'320px'}"
 > 
     <!-- 平台名称 -->
-    <router-link to="/">
+    <router-link to="/cluster/dashboard">
         <el-button text>
             <el-icon><Icons.HomeFilled /></el-icon>
             <span v-show="!isCollapse">KubeCtrl</span>
