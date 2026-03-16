@@ -6,8 +6,7 @@ import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
 import Add from './Add.vue'
 
 
-// ++++++++++++++++++++++++++++++++  操作逻辑
-// 增
+// ++++++++++++++++++++++++++++++++  增
 // add_2:打开添加集群的表单
 const opDialog = ref(false)
 const addItem = () => {
@@ -32,7 +31,44 @@ const updateOp = () =>{
     userDialog.value = false
     getList()
 }
-// 删
+// add_8:获取当前列表
+const getList = () =>{
+    loading.value = true
+    getListHandler().then((response)=>{
+        if (response.status === 200) {
+            data.tableData = response.data.data; // 更新 tableData
+            loading.value = false
+        } else {
+            console.error('获取列表失败:', response.msg);
+        }
+    })
+}
+// ++++++++++++++++++++++++++++++++  删
+// delete_2 删除集群
+const deleteRow = (row) => {
+    // 删除提醒
+    ElMessageBox.confirm(
+        '确认删除集群：' + row.clusterId,
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+    .then(() => {
+        deleteHandler(row.clusterId).then((response)=>{
+            ElMessage({
+                type: 'success',
+                message: response.data.msg,
+            })
+            // 刷新列表
+            getList()
+        })
+    })
+    .catch(() => {
+        return
+    }) 
+}
 // 改
 // 查
 
@@ -62,18 +98,7 @@ interface Cluster {
 
 
 
-// add_8:获取当前列表
-const getList = () =>{
-    loading.value = true
-    getListHandler().then((response)=>{
-        if (response.status === 200) {
-            data.tableData = response.data.data; // 更新 tableData
-            loading.value = false
-        } else {
-            console.error('获取列表失败:', response.msg);
-        }
-    })
-}
+
 
 const search = ref('')
 
@@ -95,32 +120,7 @@ const handleDelete = (index: number, row: User) => {
 // 加载图标
 const loading = ref(false)
 
-// 删除用户
-const deleteRow = (row) => {
-    console.log("获取到的数据:",filterTableData)
-    // 删除提醒
-    ElMessageBox.confirm(
-        '确认删除集群：' + row.clusterId,
-        {
-            confirmButtonText: '确认',
-            cancelButtonText: '取消',
-            type: 'warning',
-        }
-    )
-    .then(() => {
-        deleteHandler(row.id).then((response)=>{
-            ElMessage({
-                type: 'success',
-                message: response.data.msg,
-            })
-            // 刷新列表
-            getList()
-        })
-    })
-    .catch(() => {
-        return
-    }) 
-}
+
 
 
 // 关闭弹窗时是否刷新用户列表
@@ -174,6 +174,7 @@ onBeforeMount(() => {
                     <el-button :disabled="scope.row.clusterStatus != 'true'" size="small" @click="updateOp(scope.row)">
                         编辑
                     </el-button>
+                    <!-- delete_1 触发删除动作 -->
                     <el-button
                         size="small"    
                         type="danger"
