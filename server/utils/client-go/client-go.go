@@ -15,22 +15,25 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// 操作参数
 var (
-	option         string = "update"     // option: add, delete, update, get
-	resource       string = "deployment" // resource: namespace, deployment
-	resourceName   string = "scaffold"   // resourceName: the name of the namespace or deployment to be added or deleted
-	resourceNsName string = "scaffold"   // resourceNsName: the name of the namespace where the deployment is located, only used when resource is deployment
+	option         string = "get"       // option: add, delete, update, get, list
+	resource       string = "namespace" // resource: namespace, deployment
+	resourceName   string = "scaffold"  // resourceName: the name of the namespace or deployment to be added or deleted
+	resourceNsName string = "scaffold"  // resourceNsName: the name of the namespace where the deployment is located, only used when resource is deployment
 
-	newNamespace corev1.Namespace  // 定义一个新的namespace对象
+	newNamespace corev1.Namespace  // 定义一个新的nameSspace对象
 	newDeopyment appsv1.Deployment // 定义一个新的deployment对象
 )
+
+// kubectl api-resources
 
 // 增加一个namespace
 func addNamespace(clientset *kubernetes.Clientset, resourceName string) {
 	newNamespace.Name = resourceName
 	_, err := clientset.CoreV1().Namespaces().Create(context.TODO(), &newNamespace, metav1.CreateOptions{})
 	if err != nil {
-		logs.Error(map[string]interface{}{"Error:": err.Error()}, "namespace创建失败.")
+		logs.Error(map[string]any{"Error:": err.Error()}, "namespace创建失败.")
 	}
 }
 
@@ -53,7 +56,7 @@ func addDeployment(clientset *kubernetes.Clientset, resourceName string) {
 
 	_, err := clientset.AppsV1().Deployments(resourceNsName).Create(context.TODO(), &newDeopyment, metav1.CreateOptions{})
 	if err != nil {
-		logs.Error(map[string]interface{}{"Error:": err.Error()}, "deployment创建失败.")
+		logs.Error(map[string]any{"Error:": err.Error()}, "deployment创建失败.")
 	}
 }
 
@@ -98,11 +101,11 @@ func addDeploymentForJson(clientset *kubernetes.Clientset, resourceName string) 
 	}`
 	err := json.Unmarshal([]byte(deployJson), &newDeopyment)
 	if err != nil {
-		logs.Error(map[string]interface{}{"Error:": err.Error()}, "deployment json解析失败.")
+		logs.Error(map[string]any{"Error:": err.Error()}, "deployment json解析失败.")
 	}
 	_, err = clientset.AppsV1().Deployments(resourceNsName).Create(context.TODO(), &newDeopyment, metav1.CreateOptions{})
 	if err != nil {
-		logs.Error(map[string]interface{}{"Error:": err.Error()}, "deployment创建失败.")
+		logs.Error(map[string]any{"Error:": err.Error()}, "deployment创建失败.")
 	}
 }
 
@@ -110,7 +113,7 @@ func addDeploymentForJson(clientset *kubernetes.Clientset, resourceName string) 
 func deleteNamespace(clientset *kubernetes.Clientset, resourceName string) {
 	err := clientset.CoreV1().Namespaces().Delete(context.TODO(), resourceName, metav1.DeleteOptions{})
 	if err != nil {
-		logs.Error(map[string]interface{}{"Error:": err.Error()}, "namespace删除失败.")
+		logs.Error(map[string]any{"Error:": err.Error()}, "namespace删除失败.")
 	}
 }
 
@@ -118,7 +121,7 @@ func deleteNamespace(clientset *kubernetes.Clientset, resourceName string) {
 func deleteDeployment(clientset *kubernetes.Clientset, resourceName string) {
 	err := clientset.AppsV1().Deployments(resourceNsName).Delete(context.TODO(), resourceName, metav1.DeleteOptions{})
 	if err != nil {
-		logs.Error(map[string]interface{}{"Error": err.Error()}, "deployment删除失败.")
+		logs.Error(map[string]any{"Error": err.Error()}, "deployment删除失败.")
 	}
 }
 
@@ -127,7 +130,7 @@ func updateDeployment(clientset *kubernetes.Clientset, resourceName string) {
 	// 获取当前deployment对象
 	deploy, err := clientset.AppsV1().Deployments(resourceNsName).Get(context.TODO(), resourceName, metav1.GetOptions{})
 	if err != nil {
-		logs.Error(map[string]interface{}{"Error:": err.Error()}, "deployment detail获取失败.")
+		logs.Error(map[string]any{"Error:": err.Error()}, "deployment detail获取失败.")
 		return
 	}
 	// 更新deployment对象
@@ -135,25 +138,71 @@ func updateDeployment(clientset *kubernetes.Clientset, resourceName string) {
 	*deploy.Spec.Replicas = 1
 	_, err = clientset.AppsV1().Deployments(resourceNsName).Update(context.TODO(), deploy, metav1.UpdateOptions{})
 	if err != nil {
-		logs.Error(map[string]interface{}{"Error:": err.Error()}, "deployment更新失败.")
+		logs.Error(map[string]any{"Error:": err.Error()}, "deployment更新失败.")
 	}
 }
 
-// 流程控制语句
+// +++++查
+// 获取当前deployments列表
+func listDeployments(clientset *kubernetes.Clientset, resourceNsName string) {
+	deploys, err := clientset.AppsV1().Deployments(resourceNsName).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		logs.Error(map[string]any{"Error:": err.Error()}, "deployment list获取失败.")
+		return
+	}
+	for _, deploy := range deploys.Items {
+		logs.Info(nil, deploy.Name)
+	}
+}
+
+// 获取namespaces列表
+func listNamespaces(clientset *kubernetes.Clientset) {
+	namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		logs.Error(map[string]any{"Error:": err.Error()}, "namespace list获取失败.")
+		return
+	}
+	for _, ns := range namespaces.Items {
+		logs.Info(nil, ns.Name)
+	}
+}
+
+// 获取pods列表
+func listPods(clientset *kubernetes.Clientset, resourceNsName string) {
+	pods, err := clientset.CoreV1().Pods(resourceNsName).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		logs.Error(map[string]any{"Error:": err.Error()}, "pods list获取失败.")
+		return
+	}
+	for _, pod := range pods.Items {
+		logs.Info(nil, pod.Name)
+	}
+}
+
+// 查看ns详情
+func getNsDetail(clientset *kubernetes.Clientset, resourceName string) {
+	nsDetail, err := clientset.CoreV1().Namespaces().Get(context.TODO(), resourceName, metav1.GetOptions{})
+	if err != nil {
+		logs.Error(map[string]any{"Error:": err.Error()}, "namespace detail获取失败.")
+		return
+	}
+	fmt.Println("查询到resourceName的详情:", nsDetail)
+}
+
 func selectActions() {
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", "./config/kubeconfig")
+	// step1 初始化 config 实例
+	config, err := clientcmd.BuildConfigFromFlags("", "./config/baseKubeConfig")
 	if err != nil {
 		panic(err.Error())
 	}
 
-	// create the clientset
+	// step2 创建客户端工具 clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	// select menu
+	// step3 通过参数控制执行方法
 	switch option {
 	case "add":
 		switch resource {
@@ -175,8 +224,24 @@ func selectActions() {
 		case "deployment":
 			updateDeployment(clientset, resourceName)
 		}
+	case "list":
+		switch resource {
+		case "namespace":
+			listNamespaces(clientset)
+		case "deployment":
+			listDeployments(clientset, resourceNsName)
+		case "pod":
+			listPods(clientset, resourceNsName)
+		}
 	case "get":
-		fmt.Println("get")
+		switch resource {
+		case "namespace":
+			getNsDetail(clientset, resourceName)
+			// case "deployment":
+			// 	getDeploDetail(clientset, resourceNsName)
+			// case "pod":
+			// 	getPodDetail(clientset, resourceNsName)
+		}
 	default:
 		fmt.Println("invalid option")
 	}
