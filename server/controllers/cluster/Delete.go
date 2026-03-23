@@ -11,7 +11,7 @@ import (
 
 func Delete(c *gin.Context) {
 	clusterID := c.Query("clusterid")
-	logs.Info(nil, "开始删除集群: "+clusterID)
+	logs.Info(nil, "开始运行集群 "+clusterID+" 删除逻辑")
 	err := config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).Delete(context.TODO(), clusterID, metav1.DeleteOptions{})
 	if err != nil {
 		logs.Error(nil, "删除集群 "+clusterID+" 失败")

@@ -1,8 +1,12 @@
 package cluster
 
-import "github.com/gin-gonic/gin"
+import (
+	"server/utils/logs"
+
+	"github.com/gin-gonic/gin"
+)
 
 func Update(c *gin.Context) {
-	returnData.Message = "更新成功"
-	c.JSON(200, returnData)
+	logs.Info(nil, "开始运行集群更新逻辑")
+	addOrUpdate(c, "update")
 }
