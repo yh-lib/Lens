@@ -13,7 +13,7 @@ const data = reactive({
         clusterLocation:"",
         clusterStatus:"",
         clusterSize:"",
-        clusterKubeconfig:""
+        kubeconfig:""
     }
 })
 const loading = ref(false)
@@ -36,23 +36,25 @@ const submitForm = (itemForm) => {
             } 
         }).catch(() => {
                     // 处理网络错误或其他异常
-                    ElMessage({
-                        message: '添加集群失败,请核对集群配置后重试',
-                        type: 'error',
-                    });
+                    ElMessage.error('添加集群失败,请核对集群配置后重试')
                     loading.value = false;
         });          
         }else{
           // update_6 调用后端接口，更新集群 
             updateHandler(itemForm).then((response)=>{
                 ElMessage({
-                message: response.data.message,
-                type: 'success',
+                    message: response.data.message,
+                    type: 'success',
                 })
+                console.log('测试日志：','标识1')
                 loading.value = false
                 // update_7 刷新列表
                 emit('refresh')
-            })        
+            }).catch(() => {
+                    // 处理网络错误或其他异常
+                    ElMessage.error('更新集群失败,请核对集群配置后重试')
+                    loading.value = false;
+        });        
         }
       }else{
           ElMessage({
@@ -120,8 +122,8 @@ const emit = defineEmits(['refresh'])
         </div>
         <!-- 右半部分 -->
         <div>
-            <el-form-item label="kubeconfig"  prop="clusterKubeconfig">
-                <el-input v-model="data.itemForm.clusterKubeconfig" autocomplete="off" type="textarea" :rows="6" style="width: 400px;" />
+            <el-form-item label="kubeconfig"  prop="kubeconfig">
+                <el-input v-model="data.itemForm.kubeconfig" autocomplete="off" type="textarea" :rows="6" style="width: 400px;" />
             </el-form-item>
             <el-form-item style="margin-left: 150px;">
                 <!-- add_3 提交表单 -->

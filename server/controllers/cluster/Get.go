@@ -12,7 +12,7 @@ import (
 func Get(c *gin.Context) {
 	// 定义存放返回前端数据的变量
 	var returnData = config.NewRetrunData()
-	clusterId := c.Query("clusterid")
+	clusterId := c.Query("clusterId")
 	clusterDetail, err := config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).Get(context.TODO(), clusterId, metav1.GetOptions{})
 	if err != nil {
 		logs.Error(map[string]any{"clusterId": clusterId, "Error": err.Error()}, "获取集群详情失败")

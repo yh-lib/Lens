@@ -23,7 +23,7 @@ type ClusterInfo struct {
 
 type ClusterConfig struct {
 	ClusterInfo
-	Kubeconfig string `json:"clusterKubeconfig" binding:"required"`
+	Kubeconfig string `json:"kubeconfig" binding:"required"`
 }
 
 // 定义一个结构体，用于描述集群的状态

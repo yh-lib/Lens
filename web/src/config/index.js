@@ -16,6 +16,7 @@ export const API_CONFIG = {
     clusterDeleteApi: `${BASE_URL}/cluster/delete`,
     clusterAddApi: `${BASE_URL}/cluster/add`,
     clusterUpdateApi: `${BASE_URL}/cluster/update`,
+    clusterGetApi: `${BASE_URL}/cluster/get`,
     // 节点管理
     nodeListApi: `${BASE_URL}/node/list`,
 }

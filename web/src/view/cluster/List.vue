@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, reactive, ref, onMounted, onBeforeMount  } from 'vue'
-import { getClusterListHandler as getListHandler,deleteClusterHandler as deleteHandler } from '../../api/cluster.js'
+import { getClusterListHandler as getListHandler,deleteClusterHandler as deleteHandler,getClusterHandler as getHandler } from '../../api/cluster.js'
 import { ElMessage, ElMessageBox} from 'element-plus'
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
 import Add from './Add.vue'
@@ -24,7 +24,8 @@ const data = reactive({
         clusterVersion:"",
         clusterLocation:"",
         clusterStatus:"",
-        clusterSize:""     
+        clusterSize:"",
+        kubeconfig:""     
     }    
 })
 // add_7 监听refresh事件，刷新用户列表
@@ -37,7 +38,6 @@ const getList = () =>{
     loading.value = true
     getListHandler().then((response)=>{
         if (response.data.status === 200) {
-             
             data.tableData = response.data.data.items; // 更新 tableData
             console.log('获取列表成功:', response.data.data.items);
             loading.value = false
@@ -84,12 +84,15 @@ const deleteRow = (row) => {
 // update_2 更新
 const method = ref('')
 const updateItem = (row) => {
-    // 传递给操作参数给子组件
-    method.value='update'
-    // 传递当前用户数据给子组件
-    data.itemForm = row
-    // 打开表单弹窗
-    opDialog.value = true
+    // 获取集群详情
+    getHandler(row.clusterId).then((response)=>{
+        data.itemForm=response.data.data.item  
+        // 注意下面这两步：如果放在axios外面，则赋值可能失败，因为是异步运行
+        // 传递给操作参数给子组件
+        method.value='update'
+        // 打开表单弹窗
+        opDialog.value = true
+    }) 
 }
 // update_3 将method.value、data.itemForm赋值给子组件
 // update_4 在子组件中将值渲染到form表单中
@@ -153,7 +156,7 @@ const loading = ref(false)
         <el-table :data="filterTableData" style="width: 100%"  height="70vh" v-loading="loading">
             <el-table-column :label="tableTtile.f1.label">
                 <template #default="scope">
-                    <router-link :to="{path: '/api/cluster/detail', query: {'clusterId': scope.row.clusterId}}">
+                    <router-link :to="{path: '/', query: {'clusterId': scope.row.clusterId}}">
                         {{ scope.row.clusterId}}
                     </router-link>
                 </template>

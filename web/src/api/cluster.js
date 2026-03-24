@@ -6,6 +6,11 @@ export const getClusterListHandler = () => {
     return request(API_CONFIG.clusterListApi, {}, 'get', 10000)
 }
 
+// 获取集群详情
+export const getClusterHandler = (clusterId) => {
+    return request(API_CONFIG.clusterGetApi, { clusterId }, 'get', 10000)
+}
+
 // 删除集群
 export const deleteClusterHandler = (clusterId) => {
     return request(API_CONFIG.clusterDeleteApi, { clusterId }, 'get', 10000)
