@@ -48,7 +48,6 @@ watch(
         ref="loginRef"
         :model="loginInfo"
         :rules="rules"
-        label-width="auto"
         class="demo-ruleForm"
     >
         <!-- 用户名: 输入表单 -->

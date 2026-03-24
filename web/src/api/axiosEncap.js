@@ -48,14 +48,29 @@ axios.interceptors.response.use(
             // token已失效,移除本地token
             window.localStorage.removeItem(CONFIG.TOKEN_NAME)
             // 跳转到登录页
-            router.currentRoute.value.path != API_CONFIG.loginApi && router.push(API_CONFIG.loginApi)
+            router.currentRoute.value.path != '/login' && router.push('/login')
+            return Promise.reject(new Error(response.data.message));
+        } else {
+            // 处理其他错误状态码 // 修改：新增处理其他错误状态码的情况
+            return Promise.reject(new Error(response.data.message || 'An error occurred'));
         }
     },
     (error) => {
         // 超出 2xx 范围的状态码都会触发该函数。
         // 对响应错误做点什么
-        ElMessage.error(error)
-        return Promise.reject(error);
+        if (error.response) {
+            // 请求已发出，但服务器响应的状态码不在 2xx 范围内
+            ElMessage.error(error.response.data.message || 'An error occurred') // 修改：显示错误信息
+            return Promise.reject(new Error(error.response.data.message || 'An error occurred')); // 修改：返回 Promise.reject 并传递错误信息
+        } else if (error.request) {
+            // 请求已发出，但没有收到响应
+            ElMessage.error('No response received') // 修改：显示错误信息
+            return Promise.reject(new Error('No response received')); // 修改：返回 Promise.reject 并传递错误信息
+        } else {
+            // 发生了一些设置请求时发生的问题
+            ElMessage.error(error.message) // 修改：显示错误信息
+            return Promise.reject(new Error(error.message)); // 修改：返回 Promise.reject 并传递错误信息
+        }
     }
 );
 
@@ -88,7 +103,6 @@ const request = (url = '', data = {}, method = 'get', timeout = 3000) => {
                     resolve(response)
 
                 }).catch((error) => {
-                    ElMessage.error(error)
                     reject(error)
                 })
             }

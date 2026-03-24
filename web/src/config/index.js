@@ -17,7 +17,7 @@ export const API_CONFIG = {
     clusterAddApi: `${BASE_URL}/cluster/add`,
     clusterUpdateApi: `${BASE_URL}/cluster/update`,
     // 节点管理
-    nodeListApi: `${BASE_URL}/node/list`,  
+    nodeListApi: `${BASE_URL}/node/list`,
 }
 
 export const CONFIG = {

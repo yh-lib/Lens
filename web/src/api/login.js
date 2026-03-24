@@ -15,20 +15,14 @@ export const login = (username, password) => {
             // 将后端返回的token保存到本地
             const token = response.data.data.token
             window.localStorage.setItem(CONFIG.TOKEN_NAME, token)
-            // 提示登录成功
+            // // 提示登录成功
             ElMessage({
                 message: response.data.message,
                 type: 'success',
             })
-            router.replace('/')
-        } else {
-            ElMessage.error('登录失败')
+            router.replace('/cluster/dashboard')
         }
     })
-        .catch((response) => {
-            console.log('username:', username, 'password:', password, 'url:', API_CONFIG.loginApi)
-            console.log('response2:', response)
-        })
 }
 
 
@@ -64,9 +58,6 @@ export const logout = () => {
                     ElMessage.error('后端退出逻辑未完成')
                 }
             })
-            // .catch((response)=>{
-            //     console.log('退出失败response:',response)
-            // }) 
         })
         .catch(() => {
             return
