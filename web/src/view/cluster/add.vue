@@ -25,16 +25,26 @@ const submitForm = (itemForm) => {
         loading.value = true
         // add_5 调用后端接口,添加集群
         if (props.subMethod == 'create') {
-          addHandler(itemForm).then((Response)=>{
-            ElMessage({
-              message: response.data.message,
-              type: 'success',
-            })
-            loading.value = false
-          })          
+          addHandler(itemForm).then((response)=>{
+            if (response.data.status === 200) {
+                ElMessage({
+                    message: response.data.message,
+                    type: 'success',
+                })
+                loading.value = false
+                emit('refresh')
+            } 
+        }).catch(() => {
+                    // 处理网络错误或其他异常
+                    ElMessage({
+                        message: '添加集群失败,请核对集群配置后重试',
+                        type: 'error',
+                    });
+                    loading.value = false;
+        });          
         }else{
           // update_6 调用后端接口，更新集群 
-            updateHandler(itemForm).then((Response)=>{
+            updateHandler(itemForm).then((response)=>{
                 ElMessage({
                 message: response.data.message,
                 type: 'success',

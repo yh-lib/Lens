@@ -10,6 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 // 定义一个结构体，用于描述创建集群所用的配置信息
@@ -34,16 +36,26 @@ type ClusterStatus struct {
 // 定义一个结构体的方法，用于判断集群的状态
 func (c *ClusterConfig) getClusterStatus() (ClusterStatus, error) {
 	// 判断集群是否是正常
-	ClusterStatus := ClusterStatus{}
-	ClusterStatus.ClusterInfo = c.ClusterInfo
-	serverVersion, err := config.InClusterClientSet.Discovery().ServerVersion()
+	clusterStatus := ClusterStatus{}
+	clusterStatus.ClusterInfo = c.ClusterInfo
+	// 基于前端传递的kubeconfig构建新的clientSet
+	restConfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(c.Kubeconfig))
 	if err != nil {
-		return ClusterStatus, err
+		return clusterStatus, err
+	}
+	clientSet, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return clusterStatus, err
+	}
+	// 获取集群版本
+	serverVersion, err := clientSet.Discovery().ServerVersion()
+	if err != nil {
+		return clusterStatus, err
 	}
 	clusterVersion := serverVersion.String()
-	ClusterStatus.Version = clusterVersion
-	ClusterStatus.Status = "Active"
-	return ClusterStatus, nil
+	clusterStatus.Version = clusterVersion
+	clusterStatus.Status = "Active"
+	return clusterStatus, nil
 }
 
 // 添加或更新集群信息
@@ -65,7 +77,7 @@ func addOrUpdate(c *gin.Context, method string) {
 		c.JSON(200, returnData)
 		return
 	}
-	logs.Info(map[string]any{"集群别名": clusterConfig.Alias, "集群ID": clusterConfig.Id}, "开始"+arg+"集群")
+	logs.Info(map[string]any{"集群别名": clusterConfig.Alias, "集群ID": clusterConfig.Id}, "开始校验集群配置信息")
 	// 判断集群是否正常
 	ClusterStatus, err := clusterConfig.getClusterStatus()
 	if err != nil {
