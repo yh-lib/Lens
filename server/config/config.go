@@ -28,6 +28,7 @@ var (
 	// inCluster相关配置
 	MetadataNamespace  string // 元数据存储的 namespace
 	InClusterClientSet *kubernetes.Clientset
+	ClusterKubeconfig  map[string]string
 )
 
 // 规范返回给前端的数据

@@ -12,18 +12,20 @@ import (
 func Delete(c *gin.Context) {
 	// 定义存放返回前端数据的变量
 	var returnData = config.NewRetrunData()
-	clusterID := c.Query("clusterId")
-	logs.Info(nil, "开始运行集群 "+clusterID+" 删除逻辑")
-	err := config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).Delete(context.TODO(), clusterID, metav1.DeleteOptions{})
+	clusterId := c.Query("clusterId")
+	logs.Info(nil, "开始运行集群 "+clusterId+" 删除逻辑")
+	err := config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).Delete(context.TODO(), clusterId, metav1.DeleteOptions{})
 	if err != nil {
-		logs.Error(nil, "删除集群 "+clusterID+" 失败")
+		logs.Error(nil, "删除集群 "+clusterId+" 失败")
 		returnData.Status = 400
-		returnData.Message = "删除集群 " + clusterID + " 失败: " + err.Error()
+		returnData.Message = "删除集群 " + clusterId + " 失败: " + err.Error()
 		c.JSON(400, returnData)
 	} else {
-		logs.Info(nil, "删除集群 "+clusterID+" 成功")
+		logs.Info(nil, "删除集群 "+clusterId+" 成功")
+		// 更新存放kubeconfig的变量
+		delete(config.ClusterKubeconfig, clusterId)
 		returnData.Status = 200
-		returnData.Message = "删除集群 " + clusterID + " 成功"
+		returnData.Message = "删除集群 " + clusterId + " 成功"
 		c.JSON(200, returnData)
 	}
 }

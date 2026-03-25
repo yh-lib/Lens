@@ -101,8 +101,9 @@ func addOrUpdate(c *gin.Context, method string) {
 	clusterConfigSectet.StringData = make(map[string]string)
 	clusterConfigSectet.StringData["kubeconfig"] = clusterConfig.Kubeconfig
 	// step1	核心操作	创建 secret
+	var secret *corev1.Secret
 	if method == "create" {
-		_, err = config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).Create(context.TODO(), &clusterConfigSectet, metav1.CreateOptions{})
+		secret, err = config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).Create(context.TODO(), &clusterConfigSectet, metav1.CreateOptions{})
 		if err != nil {
 			logs.Error(map[string]any{"集群别名": clusterConfig.Alias, "集群ID": clusterConfig.Id, "ERROR": err.Error()}, "集群添加失败")
 			msg := "集群添加失败:" + err.Error()
@@ -112,7 +113,7 @@ func addOrUpdate(c *gin.Context, method string) {
 			return
 		}
 	} else {
-		_, err = config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).Update(context.TODO(), &clusterConfigSectet, metav1.UpdateOptions{})
+		secret, err = config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).Update(context.TODO(), &clusterConfigSectet, metav1.UpdateOptions{})
 		if err != nil {
 			logs.Error(map[string]any{"集群别名": clusterConfig.Alias, "集群ID": clusterConfig.Id, "ERROR": err.Error()}, "集群更新失败")
 			msg := "集群更新失败:" + err.Error()
@@ -122,6 +123,11 @@ func addOrUpdate(c *gin.Context, method string) {
 			return
 		}
 	}
+	// 更新存放kubeconfig的变量
+	clusterId := secret.Name
+	kubeConfigStr := string(secret.Data[clusterId])
+	config.ClusterKubeconfig[clusterId] = kubeConfigStr
+
 	logs.Info(map[string]any{"集群别名": clusterConfig.Alias, "集群ID": clusterConfig.Id}, "集群"+arg+"成功")
 	returnData.Status = 200
 	returnData.Message = "集群" + arg + "成功"

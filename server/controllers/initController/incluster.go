@@ -47,5 +47,13 @@ func metaDataInit() {
 	} else {
 		logs.Warning(nil, "namespace: "+newNamespace.Name+" 已存在")
 	}
+	// 获取集群kubeconfig
+	config.ClusterKubeconfig = make(map[string]string)
+	clusterList, _ := config.InClusterClientSet.CoreV1().Secrets(config.MetadataNamespace).List(context.TODO(), metav1.ListOptions{})
+	for _, secret := range clusterList.Items {
+		clusterId := secret.Name
+		kubeConfigStr := string(secret.Data["kubeconfig"])
+		config.ClusterKubeconfig[clusterId] = kubeConfigStr
+	}
 	logs.Info(nil, "初始化程序配置已完成")
 }
