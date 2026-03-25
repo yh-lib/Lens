@@ -29,6 +29,7 @@ var (
 	MetadataNamespace  string // 元数据存储的 namespace
 	InClusterClientSet *kubernetes.Clientset
 	ClusterKubeconfig  map[string]string
+	ProtectNameSpace   map[string]bool
 )
 
 // 规范返回给前端的数据
@@ -99,5 +100,10 @@ func init() {
 	initLogConfig(logLevel)
 	// 日志格式加载完成提示
 	logs.Info(nil, "The log configuration loading is complete.")
-
+	// namespace保护清单
+	ProtectNameSpace = map[string]bool{
+		"kube-system": true,
+		"kc":          true,
+		"test":        true,
+	}
 }

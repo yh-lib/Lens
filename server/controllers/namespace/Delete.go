@@ -20,6 +20,13 @@ func Delete(c *gin.Context) {
 	}
 	var nameSpace corev1.Namespace
 	nameSpace.Name = basicInfo.NameSpace
+	// 禁止删除保护的namespace
+	if config.ProtectNameSpace["test"] == true {
+		returnData.Status = 400
+		returnData.Message = nameSpace.Name + " 禁止删除"
+		c.JSON(200, returnData)
+		return
+	}
 	err = clientSet.CoreV1().Namespaces().Delete(context.TODO(), nameSpace.Name, metav1.DeleteOptions{})
 	if err != nil {
 		returnData.Status = 400
