@@ -7,27 +7,26 @@ import (
 	"server/utils/logs"
 
 	"github.com/gin-gonic/gin"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Get(c *gin.Context) {
 	logs.Info(nil, "详情逻辑")
 	returnData := config.ReturnData{}
+	returnData.Data = map[string]any{}
 	clientSet, basicInfo, err := controllers.BasicInit(c)
 	if err != nil {
 		logs.Error(map[string]any{"Error": err}, "clientSet 初始化失败")
 	}
-	var newNameSpace corev1.Namespace
-	newNameSpace.Name = basicInfo.NameSpace
-	_, err = clientSet.CoreV1().Namespaces().Create(context.TODO(), &newNameSpace, metav1.CreateOptions{})
+	getNs, err := clientSet.CoreV1().Namespaces().Get(context.TODO(), basicInfo.NameSpace, metav1.GetOptions{})
 	if err != nil {
 		returnData.Status = 400
-		returnData.Message = "创建 namespace: " + newNameSpace.Name + " 失败:" + err.Error()
-		logs.Error(map[string]any{"Error": err}, "创建 namespace: "+newNameSpace.Name+" 失败:")
+		returnData.Message = "查询 namespace: " + basicInfo.NameSpace + " 详情失败:" + err.Error()
+		logs.Error(map[string]any{"Error": err}, "查询 namespace: "+basicInfo.NameSpace+" 详情失败:")
 	} else {
 		returnData.Status = 200
-		returnData.Message = "创建 namespace: " + newNameSpace.Name + " 成功:"
+		returnData.Message = "查询 namespace: " + basicInfo.NameSpace + " 详情成功"
+		returnData.Data["item"] = getNs
 	}
 	c.JSON(200, returnData)
 }
