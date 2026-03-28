@@ -11,6 +11,20 @@ import (
 
 func Get(c *gin.Context) {
 	logs.Info(nil, "详情逻辑")
+	// 定义变量
+	var (
+		kubeUtilser kubeutils.KubeUtilser
+		returndata  config.ReturnData
+		info        controllers.Info
+	)
+	kubeconfig := controllers.NewInfo(c, &info)
+	// 通过构造函数 构建一个实例
+	instance := kubeutils.NewNode(kubeconfig, nil)
+	kubeUtilser = instance
+	item, _ := kubeUtilser.Get("", info.Name)
+	returndata.Data = map[string]any{}
+	returndata.Data["item"] = item
+	c.JSON(200, returndata)
 }
 
 func List(c *gin.Context) {
