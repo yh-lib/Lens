@@ -7,7 +7,6 @@ import (
 )
 
 func Add(c *gin.Context) {
-	clusterID := c.Query("clusterid")
-	logs.Info(nil, "开始运行集群 "+clusterID+" 添加逻辑")
-	addOrUpdate(c, "create")
+	logs.Info(nil, "集群添加逻辑")
+	addOrUpdate(c, "add")
 }
