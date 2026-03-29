@@ -6,7 +6,9 @@ import (
 	"server/config"
 	"server/utils/logs"
 
+	"github.com/dotbalo/kubeutils/kubeutils"
 	"github.com/gin-gonic/gin"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -100,4 +102,63 @@ func BasicInit(c *gin.Context, item any) (clientSet *kubernetes.Clientset, basic
 	}
 	logs.Debug(nil, "集群版本："+serverVersion.String())
 	return clientSet, basicInfo, nil
+}
+
+func newReturnData(c *gin.Context, err error, returndata config.ReturnData, msg string) {
+	logs.Error(map[string]any{"ERROR": err.Error()}, msg)
+	returndata.Status = 200
+	returndata.Message = msg + ": " + err.Error()
+	c.JSON(200, returndata)
+}
+
+func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
+	logs.Debug(nil, resourceType+"列表逻辑")
+	// 定义变量
+	var (
+		kubeUtilser kubeutils.KubeUtilser
+		returndata  config.ReturnData
+		info        Info
+		item        corev1.Node
+	)
+	// 初始化返回数据
+	returndata.Data = map[string]any{}
+	info.Item = &item
+	kubeconfig := NewInfo(c, &info)
+	// 匹配资源类型
+	switch resourceType {
+	case "node":
+		kubeUtilser = kubeutils.NewNode(kubeconfig, &item)
+	default:
+		logs.Error(nil, "不支持该资源类型")
+		return
+	}
+	// 匹配操作方法
+	switch opMethod {
+	case "list":
+		items, err := kubeUtilser.List("", info.LabelSelector, info.FieldSelector)
+		if err != nil {
+			newReturnData(c, err, returndata, "获取列表失败")
+			return
+		}
+		returndata.Data["items"] = items
+	case "get":
+		item, err := kubeUtilser.Get("", info.Name)
+		if err != nil {
+			newReturnData(c, err, returndata, "获取详情失败")
+			return
+		}
+		returndata.Data["items"] = item
+	case "update":
+		err := kubeUtilser.Update(info.NameSpace)
+		if err != nil {
+			newReturnData(c, err, returndata, "更新失败2")
+			return
+		}
+	default:
+		logs.Error(nil, "不支持该操作方法")
+		return
+	}
+	returndata.Status = 200
+	returndata.Message = "操作成功"
+	c.JSON(200, returndata)
 }
