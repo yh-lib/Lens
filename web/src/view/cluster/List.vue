@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, ref, onMounted, onBeforeMount  } from 'vue'
+import { computed, reactive, ref, onBeforeMount  } from 'vue'
 import { getClusterListHandler as getListHandler,deleteClusterHandler as deleteHandler,getClusterHandler as getHandler } from '../../api/cluster.js'
 import { ElMessage, ElMessageBox} from 'element-plus'
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
@@ -65,13 +65,16 @@ const deleteRow = (row) => {
         }
     )
     .then(() => {
-        deleteHandler(row.clusterId).then((response)=>{
-            ElMessage({
-                type: 'success',
-                message: response.data.message,
-            })
-            // 刷新列表
-            getList()
+        deleteHandler(row.clusterId).then((res)=>{
+            console.log("删除集群 res:",res)
+            if (res.data.status == 200) {
+                ElMessage({
+                    type: 'success',
+                    message: res.data.message,
+                })
+                // 刷新列表
+                getList()                 
+            }
         })
     })
     .catch(() => {

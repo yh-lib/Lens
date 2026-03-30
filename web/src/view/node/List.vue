@@ -1,16 +1,37 @@
 <script lang="ts" setup>
 import { computed, reactive, ref, onBeforeMount  } from 'vue'
 import { getnodeListHandler as getListHandler,getnodeHandler as getHandler } from '../../api/node.js'
+import { getClusterListHandler} from '../../api/cluster.js'
 import Add from './Add.vue'
 import { ElSelect } from 'element-plus'
 
-// 样式
-const props = {
-  value: 'id',
-  label: 'label',
-  options: 'options',
-  disabled: 'disabled',
-}
+// 需要的数据变量
+const data = reactive({
+  items: [],
+  clusterList: [],
+  clusterId: "",
+  editItem: {},
+  editNodeName: "",
+  detailItem: {},
+  detailNodeName: "",
+  createName: "",
+  // 集群选择器
+  clusterOptions:[],
+  value: "",
+})
+
+// 加载前
+onBeforeMount(async () => {
+    console.log("挂载前：：：：：：：：")
+    // 获取集群列表
+    await getClusterList()
+    // 获取集群选择器菜单
+    data.clusterList.forEach(item => {
+        console.log("看这里:::::::::", item)
+    })
+})
+
+
 
 const options = [
   {
@@ -38,20 +59,23 @@ const options = [
 ]
 
 
-// ++++++增
-
-// add_2:打开添加节点的表单
-const opDialog = ref(false)
-
-// add_4 定义表单初始数据
-const data = reactive({
-    items:[]
-})
-// add_7 监听refresh事件，刷新用户列表
-const refreshList = () =>{
-    opDialog.value = false
-    getList()
+// 获取集群列表
+const getClusterList = async ()=>{
+    await getClusterListHandler().then((res)=>{
+        if (res.data.status === 200) {
+            data.clusterList = res.data.data.items;
+            console.log('成功获取集群列表:::', data.clusterList);
+        } else {
+            console.error('获取集群列表失败:', res.data.message);
+        }
+    })
 }
+
+const getNodeList = ()=>{
+    loading.value = true
+
+}
+
 // add_8 获取当前列表
 const getList = () =>{
     loading.value = true
@@ -65,6 +89,32 @@ const getList = () =>{
         }
     })
 }
+
+
+// 样式
+const props = {
+  value: 'id',
+  label: 'label',
+  options: 'options',
+  disabled: 'disabled',
+}
+
+
+
+
+// ++++++增
+
+// add_2:打开添加节点的表单
+const opDialog = ref(false)
+
+// add_4 定义表单初始数据
+
+// add_7 监听refresh事件，刷新用户列表
+const refreshList = () =>{
+    opDialog.value = false
+    getList()
+}
+
 // add_9 关闭dialog时刷新用户列表
 const closeDialog = () =>{
     method.value == 'create' && getList()
@@ -131,13 +181,15 @@ const loading = ref(false)
                     <span style="font-size: 24px;">{{ titleName }}</span>
                 </div>
                 <div>
-                    <el-select
-                        v-model="value"
-                        :options="options"
-                        :props="props"
-                        placeholder="选择集群"
-                        style="width: 240px;margin-right: 10px;"
-                    />
+                    <el-select v-model="data.value" placeholder="选择集群" style="width: 240px;margin-right: 10px;">
+                        <el-option
+                            v-for="item in data.clusterList"
+                            :key="item.clusterId"
+                            :label="item.clusterId"
+                            :value="item.clusterId"
+                            :disabled="item.disabled"
+                        />     
+                    </el-select>               
                     <el-input v-model="search" style="width: 240px" placeholder="搜索节点"/>
                 </div>
             </div>
@@ -188,7 +240,7 @@ const loading = ref(false)
             <!-- f7 操作-->
             <el-table-column :label="tableTtile.f7.label" :prop="tableTtile.f7.prop">
                 <template #default="scope">
-                    <el-button link type="primary" @click="edit(scope.row)">编辑</el-button>
+                    <el-button link type="primary" @click="edit(scope.row)">配置</el-button>
                 </template>
             </el-table-column>
         </el-table>  
