@@ -20,6 +20,7 @@ const data = reactive({
     // 表格
     opDialog: false,    // 配置、主机名 对话框
     nodeLabels: [],          // 后端返回的label
+    nodeTaints: [],
 })
 
 // // // 子组件加载前自动获取数据
@@ -31,13 +32,15 @@ onBeforeMount(async () => {
 
 // 获取节点标签
 const getLabel = () => {
+    // console.log("获取节点调试数据:",data.item.spec.taints)
+    // 获取标签
     data.nodeLabels = obj2list(data.item.metadata.labels)
-    console.log("获取节点标签:",data.nodeLabels)
 }
 
 // 节点配置
 const updateItem = (row) => {
     data.curHostName = row.metadata.name
+    data.nodeTaints = row.spec.taints
     // 获取节点详情s
     getHandler(data.curClusterId,data.curHostName).then((res)=>{
         console.log("获取节点详情:",res)
@@ -181,9 +184,11 @@ const getclusterOptions = async ()=>{
             </template>
             <!-- dialog middle -->
             <el-tabs v-model="nodeLabel" class="demo-tabs" @tab-click="getLabel">
+                <!-- 标签   详情 -->
                 <el-tab-pane label="详情" name="nodeDetail">
                     User
                 </el-tab-pane>
+                <!-- 标签   标签 -->
                 <el-tab-pane label="标签" name="nodeLabel">
                     <el-table :data="data.nodeLabels" style="width: 100%">
                         <el-table-column prop="key" label="Key"/>
@@ -198,8 +203,21 @@ const getclusterOptions = async ()=>{
                         </el-table-column>
                     </el-table>                        
                 </el-tab-pane>
+                <!-- 标签   污点 -->
                 <el-tab-pane label="污点" name="nodeTaint">
-                    Role
+                    <el-table :data="data.nodeTaints" style="width: 100%">
+                        <el-table-column prop="key" label="Key"/>
+                        <el-table-column prop="value" label="Value"/>
+                        <el-table-column prop="Effect" label="Effect"/>
+                        <el-table-column>
+                            <template #header>
+                                <el-button type="primary" link style="font-size: 16px;margin-bottom: 10px;" >添加</el-button>  
+                            </template>
+                            <template #default="scope">
+                                <el-button type="danger" link style="font-size: 16px;margin-bottom: 10px;" >删除</el-button>
+                            </template>                      
+                        </el-table-column>
+                    </el-table> 
                 </el-tab-pane>
             </el-tabs>
         </el-dialog>          
