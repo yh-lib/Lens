@@ -30,6 +30,19 @@ onBeforeMount(async () => {
     getList();
 })
 
+// 获取节点角色
+const getNodeRole = computed(() => {
+    const keyList = Object.keys(data.item.metadata.labels)
+    if (keyList.length == 0) {
+        return "工作节点"
+    }
+    if (keyList.includes('node-role.kubernetes.io/control-plane') || keyList.includes('node-role.kubernetes.io/controlplane') || keyList.includes('node-role.kubernetes.io/master')) {
+        return "控制节点"
+    }
+    return "工作节点"
+})
+    
+
 // 获取节点标签
 const getLabel = () => {
     // console.log("获取节点调试数据:",data.item.spec.taints)
@@ -170,27 +183,47 @@ const getclusterOptions = async ()=>{
         <el-dialog 
             v-model="data.opDialog"
             width="1600px"
-            style="height: 800px;"
+            style="height: 600px;"
             @close="closeDialog"
             destroy-on-close
         >
             <!-- dialog header -->
             <template #header>
-                <span style="font-size: 18px;">节点配置</span>
+                
                 <div style="display: flex; justify-content: flex-start;">
                     <el-tag type="primary" effect="plain" style="margin-right: 10px;">集群: {{ data.curClusterId || '-' }}</el-tag>
                     <el-tag type="primary" effect="plain" style="margin-right: 10px;">节点: {{ data.item?.metadata?.name || '-' }}</el-tag>
+                    <span style="font-size: 18px;margin-left: 500px;">节点配置</span>
                 </div>
             </template>
             <!-- dialog middle -->
             <el-tabs v-model="nodeLabel" class="demo-tabs" @tab-click="getLabel">
                 <!-- 标签   详情 -->
                 <el-tab-pane label="详情" name="nodeDetail">
-                    User
+                    <el-descriptions :column="2" size="large" border>
+                        <el-descriptions-item label="主机名">{{ data.curHostName }}</el-descriptions-item>
+                        <el-descriptions-item label="IP地址">{{ data.item.status.addresses[0].address }}</el-descriptions-item>
+                        <el-descriptions-item label="角色">{{ getNodeRole }}</el-descriptions-item>
+
+                        <el-descriptions-item label="节点状态">
+                            <el-tag :type="data.item.status.conditions[data.item.status.conditions.length-1].status=='True'?'success':'danger'">
+                                {{ data.item.status.conditions[data.item.status.conditions.length-1].reason }}
+                            </el-tag>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="Pods"><el-button link type="primary">{{ data.item.status.capacity.pods }}</el-button></el-descriptions-item>
+                        <el-descriptions-item label="操作系统">{{ data.item.status.nodeInfo.osImage }}</el-descriptions-item>
+
+                        <el-descriptions-item label="Runtime">{{ data.item.status.nodeInfo.containerRuntimeVersion }}</el-descriptions-item>
+                        <el-descriptions-item label="CPU架构">{{ data.item.status.nodeInfo.architecture }}</el-descriptions-item>
+                        <el-descriptions-item label="组件版本">{{ data.item.status.nodeInfo.kubeletVersion }}</el-descriptions-item>
+
+                        <el-descriptions-item label="系统内核">{{ data.item.status.nodeInfo.kernelVersion }}</el-descriptions-item>
+
+                    </el-descriptions>                    
                 </el-tab-pane>
                 <!-- 标签   标签 -->
                 <el-tab-pane label="标签" name="nodeLabel">
-                    <el-table :data="data.nodeLabels" style="width: 100%">
+                    <el-table :data="data.nodeLabels" style="width: 100%; height:440px">
                         <el-table-column prop="key" label="Key"/>
                         <el-table-column prop="value" label="Value"/>
                         <el-table-column>
@@ -205,7 +238,7 @@ const getclusterOptions = async ()=>{
                 </el-tab-pane>
                 <!-- 标签   污点 -->
                 <el-tab-pane label="污点" name="nodeTaint">
-                    <el-table :data="data.nodeTaints" style="width: 100%">
+                    <el-table :data="data.nodeTaints" style="width: 100%; height:440px">
                         <el-table-column prop="key" label="Key"/>
                         <el-table-column prop="value" label="Value"/>
                         <el-table-column prop="Effect" label="Effect"/>
