@@ -183,7 +183,7 @@ const loading = ref(false)
             <el-table-column :label="tableTtile.f6.label" :prop="tableTtile.f6.prop" />
             <el-table-column align="right">
                 <template #header>    
-                    <el-button type="primary" @click="addItem" style="width: 105px;">添加集群</el-button> 
+                    <el-button type="primary" @click="addItem" style="width: 105px;margin-bottom: 10px;">添加集群</el-button> 
                 </template>                          
                 <template #default="scope">
                     <!-- update_1 触发编辑操作 -->

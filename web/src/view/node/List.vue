@@ -2,9 +2,10 @@
 import { computed, reactive, ref, onBeforeMount, effect  } from 'vue'
 import { getnodeListHandler as getListHandler,getnodeHandler as getHandler } from '../../api/node.js'
 import { getClusterListHandler} from '../../api/cluster.js'
-import { ElSelect } from 'element-plus'
-import { Loading } from '@element-plus/icons-vue'
-import { obj2list } from '../../utils/typeConv/type.conv.js'
+import { ElSelect,ElMessage } from 'element-plus'
+import { list2obj, obj2list } from '../../utils/typeConv/type.conv.js'
+import request from '../../api/axiosEncap.js'
+import { API_CONFIG } from '../../config/index.js'
 
 // 需要的数据变量
 const data = reactive({
@@ -26,7 +27,17 @@ const data = reactive({
         {label: "禁止调度", value: "NoSchedule"},
         {label: "驱逐", value: "NoExecute"},
         {label: "尽量不调度", value: "PreferNoSchedule"}
-    ]
+    ],
+    // axios
+    requestItem: {
+        clusterId:"",
+        nameSpace:"",
+        name:"",
+        item:{},
+    },
+    // 列表页面
+    swSchedule: false,
+    swExeCute: false,
 })
 
 // // // 子组件加载前自动获取数据
@@ -35,6 +46,54 @@ onBeforeMount(async () => {
     data.curClusterId=data.defaultClusterId // 获取基础设施集群的Node列表
     getList();
 })
+
+// 更新按钮实现逻辑
+const updateItem = () => {
+    if (data.curTabName == 'nodeLabel'){
+        // 构建后端所需数据
+        data.requestItem.clusterId = data.curClusterId
+        data.requestItem.nameSpace = ""
+        data.requestItem.name = data.curHostName
+        data.requestItem.item = data.item
+        data.requestItem.item.metadata.labels = list2obj(data.nodeLabels)
+        // 调用后端API
+        request(API_CONFIG.nodeUpdateApi,data.requestItem,'post').then((res)=>{
+            if (res.data.status === 200) {
+                ElMessage({
+                    message: res.data.message,
+                    type: 'success',
+                })
+                data.opDialog = false
+            } else {
+                ElMessage.error({message: res.data.message})
+
+            }
+
+        })
+    }
+    else if (data.curTabName == 'nodeTaint') {
+        // 构建后端所需数据
+        data.requestItem.clusterId = data.curClusterId
+        data.requestItem.nameSpace = ""
+        data.requestItem.name = data.curHostName
+        data.requestItem.item = data.item
+        data.requestItem.item.spec.taints = data.nodeTaints
+        // 调用后端API
+        request(API_CONFIG.nodeUpdateApi,data.requestItem,'post').then((res)=>{
+            if (res.data.status === 200) {
+                ElMessage({
+                    message: res.data.message,
+                    type: 'success',
+                })
+                data.opDialog = false
+            } else {
+                ElMessage.error({message: res.data.message})
+
+            }
+
+        })
+    }
+}
 
 // 获取节点角色（纯 JS 版本）
 const getNodeRole = (labels = {}) => {
@@ -77,7 +136,7 @@ const getLabel = () => {
 }
 
 // 节点配置
-const updateItem = (row) => {
+const getItem = (row) => {
     data.curTabName = 'nodeDetail'
     data.curHostName = row.metadata.name
     data.nodeTaints = Array.isArray(row.spec?.taints) ? [...row.spec.taints] : []
@@ -160,7 +219,7 @@ const getclusterOptions = async ()=>{
         <el-table :data="filterTableData" style="width: 100%;"  height="70vh" v-loading="data.loading">
             <el-table-column label="主机名" prop="hostName">
                 <template #default="scope">
-                    <el-button link type="primary" @click="updateItem(scope.row)">
+                    <el-button link type="primary" @click="getItem(scope.row)">
                         {{ scope.row.status.addresses[1].address}} 
                     </el-button>                        
                 </template>
@@ -188,19 +247,19 @@ const getclusterOptions = async ()=>{
                     <span v-else  style="color: red;">NotReady</span>
                 </template>
             </el-table-column>
-            <el-table-column label="禁止调度" prop="scheduling" >
+            <el-table-column label="禁止调度" prop="schedule" >
                 <template #default="scope">
-                    <el-switch v-model="value1" />
+                    <el-switch v-model="data.swSchedule" />
                 </template>
             </el-table-column>
             <el-table-column label="驱逐" prop="eviction" >
                 <template #default="scope">
-                    <el-switch v-model="value1" />
+                    <el-switch v-model="data.swExeCute" />
                 </template>     
             </el-table-column>
             <el-table-column label="操作" prop="edit">
                 <template #default="scope">
-                    <el-button link type="primary" @click="updateItem(scope.row)">配置</el-button>
+                    <el-button link type="primary" @click="getItem(scope.row)">配置</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -307,7 +366,7 @@ const getclusterOptions = async ()=>{
             </el-tabs>
             <template #footer>
                 <div style="display: flex; justify-content:center;">
-                    <el-button v-if="data.curTabName !== 'nodeDetail'" type="primary">更新</el-button>
+                    <el-button v-if="data.curTabName !== 'nodeDetail'" type="primary" @click="updateItem">更新</el-button>
                 </div>                
             </template>
         </el-dialog>          
