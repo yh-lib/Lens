@@ -1,5 +1,5 @@
 <script setup>
-import { DArrowLeft,SwitchButton,DArrowRight } from '@element-plus/icons-vue'
+import { DArrowLeft,SwitchButton,DArrowRight, Fold, Expand } from '@element-plus/icons-vue'
 import { logout } from '../../../api/login';
 import { useIsCollapse } from '../../../store/index.js'
 import { storeToRefs } from 'pinia';
@@ -17,8 +17,8 @@ const collapseChange = () => {
     <div>
         <el-header class="el-header">
             <el-button @click="collapseChange">
-                <el-icon size="20" v-show=!isCollapse ><DArrowLeft /></el-icon>
-                <el-icon size="20" v-show=isCollapse><DArrowRight /></el-icon>
+                <el-icon size="20" v-show=!isCollapse ><Fold /></el-icon>
+                <el-icon size="20" v-show=isCollapse><Expand /></el-icon>
             </el-button>
             <el-button @click="logout">
                 <el-icon size="20"><SwitchButton /></el-icon>

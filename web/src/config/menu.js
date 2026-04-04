@@ -32,68 +32,34 @@ export const MENU_CONFIG = [
         title: '工作负载',
         index: '/workloads',
         icon: 'Box', // 盒子代表容器/负载
-        subMenu: [
+        items: [
+            {
+                title: 'Pod',
+                index: '/workloads/pod',
+                icon: 'Aim',
+            },
             {
                 title: '部署 (Deployments)',
                 index: '/workloads/deployments',
                 icon: 'Suitcase', // 火箭代表发布/部署
-                items: [
-                    {
-                        title: '创建部署',
-                        index: '/workloads/deployments/create'
-                    },
-                    {
-                        title: '部署列表',
-                        index: '/workloads/deployments/list'
-                    }
-                ]
             },
             {
                 title: '有状态集 (StatefulSets)',
                 index: '/workloads/statefulsets',
                 icon: 'Coin', // 数据库代表有状态
-                items: [
-                    {
-                        title: '创建有状态集',
-                        index: '/workloads/statefulsets/create'
-                    },
-                    {
-                        title: '有状态集列表',
-                        index: '/workloads/statefulsets/list'
-                    }
-                ]
             },
             {
                 title: '守护进程集 (DaemonSets)',
                 index: '/workloads/daemonsets',
                 icon: 'Lock', // 盾牌代表守护/安全
-                items: [
-                    {
-                        title: '创建守护进程',
-                        index: '/workloads/daemonsets/create'
-                    },
-                    {
-                        title: '守护进程列表',
-                        index: '/workloads/daemonsets/list'
-                    }
-                ]
             },
             {
                 title: '任务与定时任务',
                 index: '/workloads/jobs',
                 icon: 'Timer', // 定时器代表任务
-                items: [
-                    {
-                        title: '任务 (Jobs)',
-                        index: '/workloads/jobs/list'
-                    },
-                    {
-                        title: '定时任务 (CronJobs)',
-                        index: '/workloads/cronjobs/list'
-                    }
-                ]
             }
         ]
+
     },
     // 3. 服务与网络
     {

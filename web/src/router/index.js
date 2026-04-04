@@ -5,6 +5,7 @@ import { userRoutes } from "./user";
 import { clusterRoutes } from "./cluster.js";
 import { nodeRoutes } from "./node.js";
 import { settingRoutes } from "./setting.js";
+import { workloadsRoutes } from "./workloads.js";
 
 // 路由配置
 const routes = [
@@ -13,7 +14,8 @@ const routes = [
     userRoutes,
     clusterRoutes,
     nodeRoutes,
-    settingRoutes
+    settingRoutes,
+    workloadsRoutes,
 ]
 
 // 实例化路由
