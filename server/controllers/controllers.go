@@ -187,14 +187,14 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 			return
 		}
 	case "list":
-		items, err := kubeUtilser.List("", info.LabelSelector, info.FieldSelector)
+		items, err := kubeUtilser.List(info.NameSpace, info.LabelSelector, info.FieldSelector)
 		if err != nil {
 			errorReturnData(c, returndata, err, info, resourceType, "获取列表失败")
 			return
 		}
 		returndata.Data["items"] = items
 	case "get":
-		item, err := kubeUtilser.Get("", info.Name)
+		item, err := kubeUtilser.Get(info.NameSpace, info.Name)
 		if err != nil {
 			errorReturnData(c, returndata, err, info, resourceType, "获取详情失败")
 			return

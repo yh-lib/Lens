@@ -27,6 +27,10 @@ export const API_CONFIG = {
     namespaceUpdateApi: `${BASE_URL}/namespace/update`,
     namespaceListApi: `${BASE_URL}/namespace/list`,
     namespaceGetApi: `${BASE_URL}/namespace/get`,
+    // pod 管理
+    podListApi: `${BASE_URL}/pod/list`,
+    podGetApi: `${BASE_URL}/pod/get`,
+
 }
 
 export const CONFIG = {

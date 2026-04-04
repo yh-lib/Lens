@@ -215,11 +215,8 @@ const filterTableData = computed(() =>
 
 // 获取当前集群Namespace列表
 const getList = () =>{
-    data.loading = true
-    
     getListHandler(data.curClusterId).then((res)=>{
         data.items = res.data.data.items;
-        data.loading = false
     })
 }
 
