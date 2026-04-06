@@ -3,6 +3,7 @@ import { computed, reactive, ref, onBeforeMount  } from 'vue'
 import { getClusterListHandler as getListHandler,deleteClusterHandler as deleteHandler,getClusterHandler as getHandler } from '../../api/cluster.js'
 import { ElMessage, ElMessageBox} from 'element-plus'
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
+import ElCard from '../components/ElCard.vue'
 import Add from './Add.vue'
 
 
@@ -116,10 +117,10 @@ const filterTableData = computed(() =>
   )
 )
 
+const handleHeaderChange = (headerData) => {
+        search.value = headerData.search || ''
+}
 
-// ++++++独立配置
-// Main 标题
-const titleName = "集群列表"
 // Table 表头
 const tableTtile = {
     f1: { prop: "clusterId", label: "ID" },
@@ -147,22 +148,8 @@ const loading = ref(false)
 </script>
 
 <template>
-    <el-card>
-        <!-- add_1:添加按钮 -->
-        <template #header>
-            <div>
-                <div class="card-header">
-                    <div>
-                        <span style="font-size: 24px;">{{ titleName }}</span>
-                    </div>
-                    <div>
-                        <el-input v-model="search" placeholder="搜索集群" style="width: 240px"/>   
-                    </div>                
-                    <!-- <el-button type="primary" @click="addItem">添加</el-button> -->
-                </div>
-            </div>          
-        </template>
-        <!-- 列表 -->
+    <ElCard title="集群列表" :op-search="true" @change="handleHeaderChange">
+        <template #table>
         <el-table :data="filterTableData" style="width: 100%"  height="70vh" v-loading="loading">
             <el-table-column :label="tableTtile.f1.label">
                 <template #default="scope">
@@ -213,14 +200,9 @@ const loading = ref(false)
             <!-- update3 将method.value、data.itemForm赋值给子组件 -->
             <Add :subMethod='method' :subRow="data.itemForm" @refresh="refreshList"/>
         </el-dialog>            
-    </el-card>
+        </template>
+    </ElCard>
 </template>
 
 <style scoped>
-.card-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-}
 </style>

@@ -1,5 +1,6 @@
 <script setup>
 import { ElSelect } from 'element-plus'
+import { Refresh} from '@element-plus/icons-vue'
 import { onBeforeMount, reactive } from 'vue';
 import { getClusterListHandler} from '../../api/cluster.js'
 import { getNamespaceListHandler } from '../../api/namespace.js';
@@ -79,18 +80,14 @@ const getclusterOptions = async ()=>{
 </script>
 
 <template>
-  <!-- card -->
-  <el-card>
-    <!-- header -->
+  <el-card class="ks-card">
     <template #header>
       <div class="card-header">
-        <!-- 标题 -->
-        <div>
-            <span style="font-size: 24px;">{{ props.title }}</span>
+        <div class="card-title-wrap">
+            <span class="card-title">{{ props.title }}</span>
         </div>
-        <div>
-          <!-- 选择集群 -->
-          <el-select v-model="data.curClusterId" placeholder="选择集群" style="width: 240px;" v-show="props.opCluster" filterable @change="handleClusterChange">
+        <div class="card-controls">
+          <el-select v-model="data.curClusterId" placeholder="选择集群" class="control-select" v-show="props.opCluster" filterable @change="handleClusterChange">
               <el-option
                   v-for="item in data.clusterOptions"
                   :key="item.clusterId"
@@ -98,8 +95,7 @@ const getclusterOptions = async ()=>{
                   :value="item.clusterId"
               />
           </el-select>               
-          <!-- 选择namespace -->
-          <el-select v-model="data.curNsName" placeholder="选择命名空间" style="width: 240px;margin-left: 10px;" v-show="props.opNs" filterable @change="handleNsChange">
+          <el-select v-model="data.curNsName" placeholder="选择命名空间" class="control-select" v-show="props.opNs" filterable @change="handleNsChange">
               <el-option
                   v-for="item in data.nsOptions"
                   :key="item.metadata.name"
@@ -107,22 +103,48 @@ const getclusterOptions = async ()=>{
                   :value="item.metadata.name"
               />
           </el-select>
-          <!-- 搜索框 -->
-          <el-input v-model="data.search" style="width: 240px;margin-left: 10px;" placeholder="搜索" v-show="props.opSearch"  @change="handleSearchChange"/>
-          <!-- 创建按钮 -->
-          <el-button type="primary" style="width: 105px; margin-left: 10px;" v-show="props.opRefresh" @click="emit('refresh')">刷新</el-button>
+          <el-input v-model="data.search" class="control-search" placeholder="搜索" v-show="props.opSearch"  @change="handleSearchChange"/>
+          <el-button style="border-radius: 12px;" :icon="Refresh" v-show="props.opRefresh" @click="emit('refresh')">刷新</el-button>
         </div>
       </div>
     </template>
-    <!-- main -->
     <slot name="table">table 数据</slot>
   </el-card>
 </template>
 
-<style>
+<style scoped>
+.ks-card {
+    width: 100%;
+    display: block;
+    border: 1px solid #e6eaf0;
+    border-radius: 24px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+    margin-top: 15px;
+}
+
 .card-header{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+}
+
+.card-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.card-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.control-select,
+.control-search {
+    width: 240px;
 }
 </style>

@@ -6,6 +6,7 @@ import { ElSelect,ElMessage } from 'element-plus'
 import { list2obj, obj2list } from '../../utils/typeConv/type.conv.js'
 import request from '../../api/axiosEncap.js'
 import { API_CONFIG } from '../../config/index.js'
+import ElCard from '../components/ElCard.vue'
 
 // 需要的数据变量
 const data = reactive({
@@ -190,33 +191,17 @@ const getclusterOptions = async ()=>{
         }
     })
 }
+
+const getSelectValue = (selectValue) => {
+    Object.assign(data, selectValue)
+    getList()
+}
 </script>
 
 <template>
-    <!-- card -->
-    <el-card>
-        <!-- card header -->
-        <template #header>
-            <div class="card-header">
-                <div>
-                    <span style="font-size: 24px;">节点列表</span>
-                </div>
-                <div>
-                    <el-select v-model="data.curClusterId" placeholder="选择集群" style="width: 240px;margin-right: 10px;" @change="getList(data.curClusterId)">
-                        <el-option
-                            v-for="item in data.clusterOptions"
-                            :key="item.clusterId"
-                            :label="item.clusterId"
-                            :value="item.clusterId"
-                            :disabled="item.disabled"
-                        />     
-                    </el-select>               
-                    <el-input v-model="data.search" style="width: 240px" placeholder="搜索节点"/>
-                </div>
-            </div>
-        </template>
-        <!-- card middle -->
-        <el-table :data="filterTableData" style="width: 100%;"  height="70vh" v-loading="data.loading">
+    <ElCard title="节点列表" :op-cluster="true" :op-search="true" :default-cluster-id="data.defaultClusterId" @change="getSelectValue">
+        <template #table>
+            <el-table :data="filterTableData" style="width: 100%;"  height="70vh" v-loading="data.loading">
             <el-table-column label="主机名" prop="hostName">
                 <template #default="scope">
                     <el-button link type="primary" @click="getItem(scope.row)">
@@ -369,25 +354,16 @@ const getclusterOptions = async ()=>{
                     <el-button v-if="data.curTabName !== 'nodeDetail'" type="primary" @click="updateItem">更新</el-button>
                 </div>                
             </template>
-        </el-dialog>          
-    </el-card>
+        </el-dialog> 
+        </template>
+         
+    </ElCard>
            
 </template>
 
 <style lang="less" scoped>
-.card-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 :deep(.no-border-input .el-input__wrapper){
     box-shadow: none;
     border: none;
 }
 </style>
-
-
-
-
-

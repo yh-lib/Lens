@@ -5,7 +5,7 @@ export const nodeRoutes = {
     children: [
         {
             path: "list",
-            component: () => import('../view/node/List.vue'),
+            component: () => import('../view/node/Node.vue'),
         }
     ]
 }
