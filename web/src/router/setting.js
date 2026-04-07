@@ -9,7 +9,7 @@ export const settingRoutes = {
         },
         {
             path: "rbac",
-            component: () => import('../view/components/YamlEdit.vue'),
+            component: () => import('../view/setting/Rbac.vue'),
         }
     ]
 }

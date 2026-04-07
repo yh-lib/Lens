@@ -6,13 +6,15 @@ import { Codemirror } from 'vue-codemirror';
 import { yaml } from '@codemirror/lang-yaml'
 const extensions = [yaml()]
 // 定义存放代码的变量
-const code = ref('')
-// 
+const props = defineProps({
+    code:String,
+})
+
 </script>
 
 <template>
     <Codemirror 
-        v-model="code"
+        v-model="props.code"
         placeholder="在此输入yaml数据..."
         :style="{ height: '600px', border: '1px solid #dcdfe6', textAlign:'left'}"
         :autofocus="true"
@@ -25,3 +27,6 @@ const code = ref('')
         @blur="console.log('blur', '编辑器失去焦点')"
     />
 </template>
+
+<style scoped>
+</style>

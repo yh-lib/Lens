@@ -1,5 +1,7 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import DialogByYaml from '../components/DialogByYaml.vue'
+import { obj2yaml } from '../../utils/typeConv/type.conv.js'
 
 const emit = defineEmits(['deleteItem'])
 
@@ -73,11 +75,11 @@ const filterTableData = computed(() =>
             item.status.hostIP.toLowerCase().includes(props.tableData.search.toLowerCase())
     )
 )
-
+const itemByYaml = ref('')
+const itemDetailDialog = ref(false)
 const getItem = (row) => {
-    console.log('getItem', row)
-    props.tableData.item = row
-    // emit('getItem', row)
+    itemByYaml.value = obj2yaml(row)
+    itemDetailDialog.value = true
 }
 </script>
 
@@ -115,4 +117,10 @@ const getItem = (row) => {
             </template>   
         </el-table-column>
     </el-table>
+    
+    <DialogByYaml
+        :dialogVisible="itemDetailDialog"
+        @closeDialog="itemDetailDialog=false"
+        :item-by-yaml="itemByYaml"
+    />
 </template> 

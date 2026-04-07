@@ -81,6 +81,7 @@ axios.interceptors.response.use(
             return response;
         } else if (response.data.status === 400) {
             notifyError(response.data.message)
+            loading.close()
             return Promise.reject(new Error(response.data.message));
         } else if (response.data.status === 401) {
             // 提示信息
@@ -92,11 +93,13 @@ axios.interceptors.response.use(
             window.localStorage.removeItem(CONFIG.TOKEN_NAME)
             // 跳转到登录页
             router.currentRoute.value.path != '/login' && router.push('/login')
+            loading.close()
             return Promise.reject(new Error(response.data.message));
         } else if (response.data.status === 403) {
             // 提示信息
             console.log("响应拦截器403:::Response:::", response.data.status)
             notifyError(response.data.message)
+            loading.close()
             return Promise.reject(new Error(response.data.message));
         }
     }

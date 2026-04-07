@@ -49,8 +49,10 @@ const getSelectValue = (selectValue) =>{
     getList()
 }
 
-// 接受子组件传递的参数
+// 接受子组件table传递的参数
 const data = reactive({})
+
+// 与dialog交互
 </script>
 
 <template>
@@ -68,5 +70,5 @@ const data = reactive({})
         <template #table>
             <Table :table-data="data" @delete-item="deleteItem"></Table>
         </template>
-    </Elcard> 
+    </Elcard>
 </template>
