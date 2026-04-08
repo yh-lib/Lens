@@ -1,9 +1,10 @@
 <script setup>
 import ElCard from '../components/ElCard.vue';
 import Table from './Table.vue';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getdeploymentListHandler,deletedeploymentHandler } from '../../api/deployment'
+import DialogByCreateItem from '../components/DialogByCreateItem.vue'
 
 // 删除 deployment
 const deleteItem = (row) => {
@@ -51,7 +52,7 @@ const getSelectValue = (selectValue) =>{
 
 // 接受子组件table传递的参数
 const data = reactive({})
-
+const createItemDialogVisible = ref(false)
 </script>
 
 <template>
@@ -62,12 +63,17 @@ const data = reactive({})
         :op-ns="true"
         :op-search="true"
         :op-refresh="true"
+        :op-create="true"
         @change="getSelectValue"
         @refresh="getList"
+        @create-item="createItemDialogVisible=true"
      >
         <!-- 卡片 main 部分 table 数据 -->
-        <template #table>
+        <template #mainData>
             <Table :table-data="data" @delete-item="deleteItem"></Table>
         </template>
      </ElCard>
+
+         <!-- 创建 item 按钮 -->
+    <DialogByCreateItem :open-dialog="createItemDialogVisible" @close-dialog="createItemDialogVisible=false"></DialogByCreateItem>
 </template>    

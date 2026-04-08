@@ -15,7 +15,7 @@ const emit = defineEmits(['closeDialog'])
             v-model="props.dialogVisible"
             title="配置编辑"
             width="1600px"
-            style="height: 700px;"
+            style="height: 840px;"
             @close="emit('closeDialog')"
             destroy-on-close
     >

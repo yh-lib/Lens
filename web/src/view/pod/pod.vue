@@ -66,7 +66,7 @@ const data = reactive({})
         @refresh="getList"
     >
         <!-- 卡片 main 部分 table 数据 -->
-        <template #table>
+        <template #mainData>
             <Table :table-data="data" @delete-item="deleteItem"></Table>
         </template>
     </Elcard>

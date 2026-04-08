@@ -197,7 +197,7 @@ const getSelectValue = (selectValue) => {
 
 <template>
     <ElCard title="节点列表" :op-cluster="true" :op-search="true" :default-cluster-id="data.defaultClusterId" @change="getSelectValue">
-        <template #table>
+        <template #mainData>
             <el-table :data="filterTableData" style="width: 100%;"  height="70vh">
             <el-table-column label="主机名" prop="hostName">
                 <template #default="scope">

@@ -24,6 +24,7 @@ const props = defineProps({
     opNs:Boolean,
     opSearch: Boolean,
     opRefresh: Boolean,
+    opCreate: Boolean,
 })
 
 const syncToParent = () => {
@@ -109,7 +110,7 @@ const getclusterOptions = async ()=>{
         </div>
       </div>
     </template>
-    <slot name="table">table 数据</slot>
+    <slot name="mainData">数据主体</slot>
     <!-- 创建或删除按钮 -->
     <el-button
         type="primary"
@@ -124,6 +125,7 @@ const getclusterOptions = async ()=>{
         "
         circle
         @click="emit('createItem')"
+        v-show="props.opCreate"
     >
         +
     </el-button>

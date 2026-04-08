@@ -140,8 +140,8 @@ interface Cluster {
 </script>
 
 <template>
-    <ElCard title="集群列表" :op-search="true" @change="handleHeaderChange" @create-item="addItem">
-        <template #table>
+    <ElCard title="集群列表" :op-search="true" :op-create="true" @change="handleHeaderChange" @create-item="addItem">
+        <template #mainData>
         <el-table :data="filterTableData" style="width: 100%"  height="70vh">
             <el-table-column :label="tableTtile.f1.label">
                 <template #default="scope">
