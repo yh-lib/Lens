@@ -8,6 +8,7 @@ import (
 
 	"github.com/dotbalo/kubeutils/kubeutils"
 	"github.com/gin-gonic/gin"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -129,19 +130,22 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 		info               Info
 		gracePeriodSeconds int64
 		// 资源类型
-		node      corev1.Node
-		pod       corev1.Pod
-		namespace corev1.Namespace
+		node       corev1.Node
+		namespace  corev1.Namespace
+		pod        corev1.Pod
+		deployment appsv1.Deployment
 	)
 	returndata.Data = map[string]any{}
 	// 初始化 Item 类型
 	switch resourceType {
 	case "node":
 		info.Item = &node
-	case "pod":
-		info.Item = &pod
 	case "namespace":
 		info.Item = &namespace
+	case "pod":
+		info.Item = &pod
+	case "deployment":
+		info.Item = &deployment
 	default:
 		logs.Error(nil, "不支持该资源类型")
 		return
@@ -152,10 +156,12 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 	switch resourceType {
 	case "node":
 		kubeUtilser = kubeutils.NewNode(kubeconfig, &node)
-	case "pod":
-		kubeUtilser = kubeutils.NewPod(kubeconfig, &pod)
 	case "namespace":
 		kubeUtilser = kubeutils.NewNamespace(kubeconfig, &namespace)
+	case "pod":
+		kubeUtilser = kubeutils.NewPod(kubeconfig, &pod)
+	case "deployment":
+		kubeUtilser = kubeutils.NewDeployment(kubeconfig, &deployment)
 	default:
 		logs.Error(nil, "不支持该资源类型")
 		return

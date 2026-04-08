@@ -93,7 +93,6 @@ const getItem = (row) => {
                 <el-button type="primary" link @click="getItem(scope.row)">{{ scope.row.metadata.name }}</el-button>
             </template>
         </el-table-column>
-        <el-table-column label="Pod IP" prop="status.podIP" />
         <el-table-column label="创建时间" prop="metadata.creationTimestamp" />
         <el-table-column label="存活时间" prop="age">
             <template #default="scope">
@@ -102,18 +101,12 @@ const getItem = (row) => {
         </el-table-column>
         <el-table-column label="命名空间" prop="metadata.namespace" />
         <el-table-column label="状态" prop="status.phase" />
-        <el-table-column label="重启次数" prop="restartCount">
-            <template #default="scope">
-                {{ getRestartCount(scope.row) }}
-            </template>
-        </el-table-column>
-        <el-table-column label="容器状态" prop="containerStatus">
+
+        <el-table-column label="Pods" prop="containerStatus">
             <template #default="scope">
                 {{ getContainerStatus(scope.row) }}
             </template>
         </el-table-column>
-        <el-table-column label="宿主机名" prop="spec.nodeName" />
-        <el-table-column label="宿主机IP" prop="status.hostIP" />
         <el-table-column label="操作" prop="operations">
             <template #default="scope">
                 <el-button link type="danger" @click="emit('deleteItem',scope.row)">删除</el-button>

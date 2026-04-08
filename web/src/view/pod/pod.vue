@@ -52,7 +52,6 @@ const getSelectValue = (selectValue) =>{
 // 接受子组件table传递的参数
 const data = reactive({})
 
-// 与dialog交互
 </script>
 
 <template>
