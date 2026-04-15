@@ -5,6 +5,7 @@ import { getSecretListHandler } from '../../api/secret';
 import { createdeploymentHandler } from '../../api/deployment';
 import { ElMessage } from 'element-plus';
 import { list2obj, obj2list } from '../../utils/typeConv/type.conv';
+import TableOfLabels from './tableOfLabels.vue';
 
 const props = defineProps(['openDialog'])
 const emit = defineEmits(['closeDialog'])
@@ -23,6 +24,7 @@ const data = reactive({
   itemAnnotationsList: [],
   tolerationOperatorValue: 'Equal',
   tolerationEffectValue: 'NoSchedule',
+  labelsAndAnnotationsSwtich: 'auto',
 })
 
 
@@ -311,6 +313,14 @@ const tolerationsEffectSelectOptions = [
                       </el-form-item>
                     </el-col>
                     <el-col :span="8" class="form-item">
+                      <el-form-item label="标签及注释">
+                        <el-radio-group v-model="data.labelsAndAnnotationsSwtich">
+                          <el-radio value="auto" size="large">自动生成</el-radio>
+                          <el-radio value="manual" size="large">手动配置</el-radio>
+                        </el-radio-group>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="8" class="form-item">
                       <el-form-item label="自动添加 Servcie">
                         <el-switch
                           v-model="data.switchAddService"
@@ -319,11 +329,11 @@ const tolerationsEffectSelectOptions = [
                     </el-col>
                   </el-row>
                 <!-- 标签|注释|容忍 -->
-                <el-tabs tab-position="left" style="height: 260px" type="border-card" class="no-border-input">
+                <el-tabs tab-position="left" style="height: 260px" type="border-card" class="no-border-input" v-if="data.labelsAndAnnotationsSwtich=='manual'">
                     <!-- 标签 tab -->
                     <el-tab-pane label="标签">
-                      <!-- 标签表格 -->
-                      <el-table :data="data.itemLabelsList" style="width: 100%; height:100%">
+                      <!-- 标签表格 -->                      
+                      <!-- <el-table :data="data.itemLabelsList" style="width: 100%; height:100%">
                           <el-table-column prop="key" label="Key">
                               <template #default="scope">
                                   <el-input v-model="scope.row.key" placeholder="请输入标签的 Key"></el-input>
@@ -342,7 +352,12 @@ const tolerationsEffectSelectOptions = [
                                   <el-button type="danger" link style="font-size: 16px;margin-bottom: 10px;" @click="deleteLabelItem(scope.$index)">删除</el-button>
                               </template>                      
                           </el-table-column>
-                      </el-table>  
+                      </el-table>   -->
+                      <TableOfLabels
+                        :label-list="data.itemLabelsList"
+                        @add-label="addLabelItem"
+                        @delete-label="deleteLabelItem"
+                      />
                     </el-tab-pane>
                     <!-- 注释 -->
                     <el-tab-pane label="注释">
@@ -421,10 +436,10 @@ const tolerationsEffectSelectOptions = [
               </template>                
             </ElCard>
         </el-tab-pane>
-        <el-tab-pane label="存储卷配置" name="Volume">存储卷配置</el-tab-pane>
-        <el-tab-pane label="调度配置" name="Schedule">调度配置</el-tab-pane>
+        <!-- <el-tab-pane label="调度配置" name="Schedule">调度配置</el-tab-pane>
+        <el-tab-pane label="存储卷配置" name="Volume">存储卷配置</el-tab-pane>        
         <el-tab-pane label="容器配置" name="Container">容器配置</el-tab-pane>
-        <el-tab-pane label="初始化容器" name="InitContainer">初始化容器</el-tab-pane>
+        <el-tab-pane label="初始化容器" name="InitContainer">初始化容器</el-tab-pane> -->
     </el-tabs>
     <el-button type="primary" size="large" style="margin-top: 20px;width: 90px;" @click="createItem">创建</el-button>
   </el-dialog>
