@@ -22,8 +22,10 @@ const data = reactive({
   updatePlicyList:[{value:'RollingUpdate'},{value:'Recreate'}],
   imagePullPolicyList: [{value:'Never'},{value:'IfNotPresent'},{value:'Always'}],
   switchAddService: false,
-  itemLabelsList: [],
-  itemAnnotationsList: [],
+  controllerLabelsList: [],
+  controllerAnnotationsList: [],
+  podLabelsList: [],
+  podAnnotationsList: [],
   tolerationOperatorValue: 'Equal',
   tolerationEffectValue: 'NoSchedule',
   labelsAndAnnotationsSwtich: 'auto',
@@ -71,23 +73,21 @@ const formData = reactive({
       "name": "",
       "namespace": "",
       "labels": {
-        "app": ""
       },
       "annotations": {
-        "deployment.kubernetes.io/revision": "1",
       },
     },
     "spec": {
       "replicas": 3,
       "selector": {
         "matchLabels": {
-          "app": ""
         }
       },
       "template": {
         "metadata": {
           "labels": {
-            "app": "testApp"
+          },
+          "annotations": {
           }
         },
         "spec": {
@@ -130,19 +130,34 @@ const formData = reactive({
 )
 
 const createItem = () => {
+  // 通用配置：clusterId,nameSpace,name
   formData.clusterId = data.curClusterId
   formData.nameSpace = data.curNsName
   formData.name = data.curResourceName
   formData.item.metadata.name = data.curResourceName
   formData.item.metadata.namespace = data.curNsName
-  formData.item.metadata.labels.app = data.curResourceName
-  formData.item.spec.selector.matchLabels.app = data.curResourceName
-  formData.item.spec.template.metadata.labels.app = data.curResourceName
-  formData.item.metadata.labels = list2obj(data.itemLabelsList)
-  formData.item.metadata.annotations = list2obj(data.itemAnnotationsList)
-  if (formData.item.spec.template.spec.imagePullSecrets && formData.item.spec.template.spec.imagePullSecrets.length && formData.item.spec.template.spec.imagePullSecrets[0].name == ''){
+  // 标签和注释
+  if (data.labelsAndAnnotationsSwtich == 'auto'){
+    // 自动生成
+    formData.item.metadata.labels.app = data.curResourceName
+    formData.item.spec.selector.matchLabels.app = data.curResourceName
+    formData.item.spec.template.metadata.labels.app = data.curResourceName
+  }else {
+    formData.item.metadata.labels = list2obj(data.controllerLabelsList)
+    formData.item.spec.selector.matchLabels = list2obj(data.controllerLabelsList)
+    formData.item.spec.template.metadata.labels = list2obj(data.controllerLabelsList)
+    formData.item.metadata.annotations = list2obj(data.controllerAnnotationsList)
+  }
+
+  // 如何过 imagePullSecrets 为空，则删除该字段，否则会报错
+  if (
+    formData.item.spec.template.spec.imagePullSecrets &&
+    formData.item.spec.template.spec.imagePullSecrets.length &&
+    formData.item.spec.template.spec.imagePullSecrets[0].name == ''
+  ){
     delete formData.item.spec.template.spec.imagePullSecrets
   }
+  // 调用后端接口 创建 Deployment
   createdeploymentHandler(formData).then((res)=>{
       if (res.data.status === 200) {
         ElMessage({
@@ -176,7 +191,10 @@ const hostNetworkSwitch = () => {
 }
 
 onBeforeMount(()=>{
-  data.itemLabelsList = obj2list(formData.item.metadata.labels)
+  data.controllerLabelsList = obj2list(formData.item.metadata.labels)
+  data.controllerAnnotationsList = obj2list(formData.item.metadata.annotations)
+  data.podLabelsList = obj2list(formData.item.spec.template.metadata.labels)
+  data.podAnnotationsList = obj2list(formData.item.spec.template.metadata.annotations)
   // 同步初始的更新策略显示状态，防止首次打开时 v-show 与 dataSend 不一致
   data.updatePoicySwitch = formData.item.spec.strategy.type === 'RollingUpdate'
   // 确保 rollingUpdate 初始存在，避免模板访问 undefined
@@ -186,18 +204,18 @@ onBeforeMount(()=>{
       maxSurge: '25%'
     }
   }
-  data.itemAnnotationsList = obj2list(formData.item.metadata.annotations)
+  
 })
 
-// 标签列表项
-const addLabelItem = () => {data.itemLabelsList.unshift({key:"",value:""})}
-const deleteLabelItem = (index) => {
-    data.itemLabelsList.splice(index,1)
+// 控制器标签
+const addControllerLabelItem = () => {data.controllerLabelsList.unshift({key:"",value:""})}
+const deleteControllerLabelItem = (index) => {
+    data.controllerLabelsList.splice(index,1)
 }
-// 注释列表项
-const addAnnotationItem = () => {data.itemAnnotationsList.unshift({key:"",value:""})}
-const deleteAnnotationItem = (index) => {
-    data.itemAnnotationsList.splice(index,1)
+// 控制器注释
+const addControllerAnnotationItem = () => {data.controllerAnnotationsList.unshift({key:"",value:""})}
+const deleteControllerAnnotationItem = (index) => {
+    data.controllerAnnotationsList.splice(index,1)
 }
 // 容忍列表项
 const addTolerationItem = () => {formData.item.spec.template.spec.tolerations.unshift({key:"",value:""})}
@@ -340,20 +358,20 @@ const deleteTolerationItem = (index) => {
                 </el-row>
                 <!-- 标签|注释|容忍 tabs -->
                 <el-tabs tab-position="left" style="height: 260px" type="border-card" class="no-border-input" v-if="data.labelsAndAnnotationsSwtich=='manual'">
-                    <!-- 控制器标签标签 -->
-                    <el-tab-pane label="控制器标签">
+                    <!-- 标签 -->
+                    <el-tab-pane label="标签">
                         <TableOfLabels
-                          :label-list="data.itemLabelsList"
-                          @add-label="addLabelItem"
-                          @delete-label="deleteLabelItem"
+                          :label-list="data.controllerLabelsList"
+                          @add-label="addControllerLabelItem"
+                          @delete-label="deleteControllerLabelItem"
                         />
                     </el-tab-pane>
-                    <!-- 控制器注释 -->
-                    <el-tab-pane label="控制器注释">
+                    <!-- 注释 -->
+                    <el-tab-pane label="注释">
                         <TableOfAnnotations 
-                          :annotations-list="data.itemAnnotationsList"
-                          @add-annotation="addAnnotationItem"
-                          @delete-annotation="deleteAnnotationItem"
+                          :annotations-list="data.controllerAnnotationsList"
+                          @add-annotation="addControllerAnnotationItem"
+                          @delete-annotation="deleteControllerAnnotationItem"
                         />
                     </el-tab-pane>
                     <!-- 容忍 -->
@@ -371,9 +389,7 @@ const deleteTolerationItem = (index) => {
               </template>                
             </ElCard>
         </el-tab-pane>
-        <!-- <el-tab-pane label="调度配置" name="Schedule">
-          
-        </el-tab-pane> -->
+        <!-- <el-tab-pane label="调度配置" name="Schedule"></el-tab-pane> -->
         <!-- <el-tab-pane label="存储卷配置" name="Volume">存储卷配置</el-tab-pane>        
         <el-tab-pane label="容器配置" name="Container">容器配置</el-tab-pane>
         <el-tab-pane label="初始化容器" name="InitContainer">初始化容器</el-tab-pane> -->
