@@ -66,7 +66,7 @@ const getItemOfYaml = (tab) => {
   // 同步数据至模板
   syncToWorkLoadItem()
   // 转换模板数据为yaml
-  itemOfYaml.value = obj2yaml(workLoadItem.value)
+  itemOfYaml.value = obj2yaml(workLoadItem.value.item)
 }
 
 // 同步子组件数据至模板
