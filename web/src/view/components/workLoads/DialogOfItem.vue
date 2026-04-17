@@ -58,7 +58,6 @@ const createItem = () => {
 const itemOfYaml = ref('')
 const getItemOfYaml = (tab) => {
   if (tab.paneName !== 'Yaml') return
-  console.log('北极点')
   itemOfYaml.value = obj2yaml(workLoadItem.value)
 }
 </script>

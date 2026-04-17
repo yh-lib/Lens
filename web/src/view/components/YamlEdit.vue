@@ -15,7 +15,14 @@ const props = defineProps({
     <Codemirror 
         v-model="props.code"
         placeholder="在此输入yaml数据..."
-        :style="{ height: '740px', border: '1px solid #dcdfe6', textAlign:'left',marginTop:'5px'}"
+        :style="{ 
+            height: '740px', 
+            border: '1px solid #e6eef7', 
+            background: '#f6f9fc', 
+            padding: '12px', 
+            textAlign:'left', 
+            marginTop:'5px'
+        }"
         :autofocus="true"
         :indent-with-tab="true"
         :tab-size="2"
