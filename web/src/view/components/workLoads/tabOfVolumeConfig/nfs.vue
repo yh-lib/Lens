@@ -16,7 +16,10 @@ const data = reactive({
             'readOnly':false
         }
     },
-    'readOnlyOptions':[true,false]
+    'readOnlyOptions':[
+        {'label':'是','value':true},
+        {'label':'否','value':false}
+    ]
 })
 
 const validate = () => ruleFormRef.value?.validate()
@@ -101,9 +104,9 @@ const rules = reactive({
             <el-select v-model="data.volumeItem.nfs.readOnly" placeholder="是否只读">
                 <el-option
                     v-for="item in data.readOnlyOptions"
-                    :key="item"
-                    :label="item"
-                    :value="item"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
                 />
             </el-select>                    
         </el-form-item>
