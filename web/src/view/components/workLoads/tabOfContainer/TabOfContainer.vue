@@ -1,53 +1,59 @@
 <script setup>
   import { ElMessage } from 'element-plus'
-  import { ref } from 'vue'
+  import { ref, reactive } from 'vue'
+  import TabOfContainerDetail from './TabOfContainerDetail.vue'
+  import { useWorkLoadData } from '../../../../store'
+  import { storeToRefs } from 'pinia'
+
+  // store from pinia
+  const store = useWorkLoadData()
+  const { workLoadItem } = storeToRefs(store)
 
   const props = defineProps(['containerType'])
 
   // 定义初始状态
-  let tabIndex = 1
-  const activeTabsValue = ref('1')
+  const activeTabsValue = ref(0)
 
-  const editableTabs = ref([
-    {
-      title: `Container-${tabIndex}`,
-      name: tabIndex,
-      content: `Container-${tabIndex}`,
-    },
-  ])
+  const data = reactive({
+    containerItem: workLoadItem.value.item.spec.template.spec.containers,
+  })
 
   const handleTabsEdit = (targetName, action) => {
     if (action === 'add') {
-      const newTabName = `${++tabIndex}`
-      editableTabs.value.push({
-        // 新增标签也使用 tabIndex 构建标题，保持风格一致
-        title: `Container-${newTabName}`,
-        name: newTabName,
-        // content 设置为同样的动态字符串
-        content: `Container-${newTabName}`,
+      const newTabIndex = data.containerItem.length
+      data.containerItem.push({
+        name: `Container-${newTabIndex}`,
+        resources: {
+          requests: {},
+          limits: {},
+        },
       })
-      activeTabsValue.value = newTabName
+      activeTabsValue.value = newTabIndex
     } else if (action === 'remove') {
       // 如果当前只有一个容器，提示并中止后续删除逻辑
-      if (editableTabs.value.length === 1 && props.containerType == 'container') {
+      if (data.containerItem.length === 1 && props.containerType == 'container') {
         ElMessage.error('至少需要保留一个容器')
         return
       }
-      const tabs = editableTabs.value
+
+      const tabs = data.containerItem
       let activeName = activeTabsValue.value
+
       if (activeName === targetName) {
         tabs.forEach((tab, index) => {
-          if (tab.name === targetName) {
+          if (index === targetName) {
             const nextTab = tabs[index + 1] || tabs[index - 1]
             if (nextTab) {
-              activeName = nextTab.name
+              activeName = tabs.indexOf(nextTab)
             }
           }
         })
       }
 
       activeTabsValue.value = activeName
-      editableTabs.value = tabs.filter((tab) => tab.name !== targetName)
+      if (Number.isInteger(targetName)) {
+        tabs.splice(targetName, 1)
+      }
     }
   }
 </script>
@@ -72,12 +78,12 @@
     style="margin-top: 10px; height: 557px"
   >
     <el-tab-pane
-      v-for="item in editableTabs"
+      v-for="(item, index) in data.containerItem"
       :key="item.name"
-      :label="item.title"
-      :name="item.name"
+      :label="item.name"
+      :name="index"
     >
-      {{ item.content }}
+      <tab-of-container-detail :container-item="data.containerItem[index]" />
     </el-tab-pane>
   </el-tabs>
 </template>

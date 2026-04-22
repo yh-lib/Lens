@@ -30,14 +30,15 @@ const defaultWorkLoadItem = () => ({
           hostNetwork: false,
           containers: [
             {
-              name: 'container-1',
-              image: '',
-              resources: {},
-              imagePullPolicy: 'IfNotPresent',
+              name: 'Container-0',
+              resources: {
+                requests: {},
+                limits: {},
+              },
             },
           ],
           volumes: [],
-          restartPolicy: 'Always',
+          restartPolicy: '',
           terminationGracePeriodSeconds: 30,
           dnsPolicy: 'Default',
           securityContext: {},

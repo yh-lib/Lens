@@ -33,7 +33,7 @@ export const list2obj = (list) => {
 
 // 对象转yaml
 export const obj2yaml = (obj) => {
-  console.log('需要转换的数据:', obj)
+  console.log('需要转换的JSON数据:', obj)
   let yamlData = null
   try {
     yamlData = yaml.dump(obj)

@@ -125,9 +125,14 @@
         <YamlEdit :code="itemOfYaml" style="height: 562px" />
       </el-tab-pane>
     </el-tabs>
-    <el-button type="primary" size="large" style="margin-top: 20px; width: 90px" @click="createItem"
-      >创建</el-button
+    <el-button
+      type="primary"
+      size="large"
+      style="margin-top: 20px; width: 90px"
+      @click="createItem"
     >
+      创建
+    </el-button>
   </el-dialog>
 </template>
 
