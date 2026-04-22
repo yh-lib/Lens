@@ -59,21 +59,10 @@
 </script>
 
 <template>
-  <div>
-    <el-button
-      type="primary"
-      link
-      size="large"
-      style="position: absolute; right: 81px; top: 8px; font-size: 16px; z-index: 1"
-      @click="handleTabsEdit(nil, 'add')"
-    >
-      添加
-    </el-button>
-  </div>
   <el-tabs
     v-model="activeTabsValue"
     type="card"
-    closable
+    editable
     @edit="handleTabsEdit"
     style="margin-top: 10px; height: 557px"
   >
