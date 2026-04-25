@@ -7,6 +7,7 @@
   import { useWorkLoadData } from '../../../../store'
   import { storeToRefs } from 'pinia'
   import { ElMessage } from 'element-plus'
+  import TableOfEnv from './TableOfEnv.vue'
 
   // store from pinia
   const store = useWorkLoadData()
@@ -46,7 +47,9 @@
     <el-tab-pane label="健康检查" name="Health">
       <TabOfHealth :container-item="props.containerItem" />
     </el-tab-pane>
-    <el-tab-pane label="环境变量" name="Env">Env</el-tab-pane>
+    <el-tab-pane label="环境变量" name="Env">
+      <TableOfEnv :container-item="props.containerItem" />
+    </el-tab-pane>
     <el-tab-pane label="存储挂载" name="VolumeMount" :disabled="data.tabOfVolumeMountDisabled">
       <TabOfVolumeMounts :container-item="props.containerItem" />
     </el-tab-pane>
