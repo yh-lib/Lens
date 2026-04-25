@@ -3,14 +3,40 @@
   import TabOfBasic from './TabOfBasic.vue'
   import TabOfPort from './TabOfPort.vue'
   import TabOfHealth from '../tabOfHealth/TabOfHealth.vue'
+  import TabOfVolumeMounts from './TabOfVolumeMounts.vue'
+  import { useWorkLoadData } from '../../../../store'
+  import { storeToRefs } from 'pinia'
+  import { ElMessage } from 'element-plus'
+
+  // store from pinia
+  const store = useWorkLoadData()
+  const { workLoadItem } = storeToRefs(store)
+
   const data = reactive({
     activeName: 'Basic',
+    tabOfVolumeMountDisabled: false,
   })
   const props = defineProps(['containerItem'])
+  const beforeTabLeave = (activeName) => {
+    if (
+      activeName == 'VolumeMount' &&
+      workLoadItem.value.item.spec.template.spec.volumes.length == 0
+    ) {
+      ElMessage.error('请先添加Volume卷')
+      return false
+    }
+
+    return true
+  }
 </script>
 
 <template>
-  <el-tabs tab-position="left" style="height: 560px" v-model="data.activeName">
+  <el-tabs
+    tab-position="left"
+    style="height: 560px"
+    v-model="data.activeName"
+    :before-leave="beforeTabLeave"
+  >
     <el-tab-pane label="基础配置" name="Basic">
       <TabOfBasic style="padding: 20px 30px" :container-item="props.containerItem" />
     </el-tab-pane>
@@ -21,7 +47,9 @@
       <TabOfHealth :container-item="props.containerItem" />
     </el-tab-pane>
     <el-tab-pane label="环境变量" name="Env">Env</el-tab-pane>
-    <el-tab-pane label="存储配置" name="Volume">Volume</el-tab-pane>
+    <el-tab-pane label="存储挂载" name="VolumeMount" :disabled="data.tabOfVolumeMountDisabled">
+      <TabOfVolumeMounts :container-item="props.containerItem" />
+    </el-tab-pane>
     <el-tab-pane label="生命周期" name="LifeCycle">LifeCycle</el-tab-pane>
   </el-tabs>
 </template>
