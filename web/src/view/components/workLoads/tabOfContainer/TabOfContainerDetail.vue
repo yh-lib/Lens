@@ -8,6 +8,7 @@
   import { storeToRefs } from 'pinia'
   import { ElMessage } from 'element-plus'
   import TableOfEnv from './TableOfEnv.vue'
+  import TabOfLifeCycle from './TabOfLifeCycle.vue'
 
   // store from pinia
   const store = useWorkLoadData()
@@ -17,7 +18,7 @@
     activeName: 'Basic',
     tabOfVolumeMountDisabled: false,
   })
-  const props = defineProps(['containerItem'])
+  const props = defineProps(['containerItem', 'containerType'])
   const beforeTabLeave = (activeName) => {
     if (
       activeName == 'VolumeMount' &&
@@ -41,10 +42,10 @@
     <el-tab-pane label="基础配置" name="Basic">
       <TabOfBasic style="padding: 20px 30px" :container-item="props.containerItem" />
     </el-tab-pane>
-    <el-tab-pane label="端口配置" name="Port">
+    <el-tab-pane label="端口配置" name="Port" v-if="props.containerType == 'container'">
       <TabOfPort style="padding: 10px 30px" :container-item="props.containerItem" />
     </el-tab-pane>
-    <el-tab-pane label="健康检查" name="Health">
+    <el-tab-pane label="健康检查" name="Health" v-if="props.containerType == 'container'">
       <TabOfHealth :container-item="props.containerItem" />
     </el-tab-pane>
     <el-tab-pane label="环境变量" name="Env">
@@ -53,6 +54,8 @@
     <el-tab-pane label="存储挂载" name="VolumeMount" :disabled="data.tabOfVolumeMountDisabled">
       <TabOfVolumeMounts :container-item="props.containerItem" />
     </el-tab-pane>
-    <el-tab-pane label="生命周期" name="LifeCycle">LifeCycle</el-tab-pane>
+    <el-tab-pane label="生命周期" name="LifeCycle" v-if="props.containerType == 'container'">
+      <TabOfLifeCycle />
+    </el-tab-pane>
   </el-tabs>
 </template>

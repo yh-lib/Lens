@@ -133,7 +133,10 @@
       :label="item.name"
       :name="index"
     >
-      <tab-of-container-detail :container-item="data.containerItem[index]" />
+      <tab-of-container-detail
+        :container-item="data.containerItem[index]"
+        :container-type="props.containerType"
+      />
     </el-tab-pane>
   </el-tabs>
 </template>
