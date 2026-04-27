@@ -37,8 +37,14 @@ const defaultWorkLoadItem = () => ({
               envFrom: [],
               volumeMounts: [],
               resources: {
-                requests: {},
-                limits: {},
+                requests: {
+                  cpu: '',
+                  memory: '',
+                },
+                limits: {
+                  cpu: '',
+                  memory: '',
+                },
               },
               startupProbe: {
                 // 通用参数

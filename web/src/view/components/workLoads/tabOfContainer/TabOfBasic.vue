@@ -13,6 +13,7 @@
   const props = defineProps(['containerItem'])
   // update data to template
   const syncMinCpu2template = () => {
+    console.log('bug1:', props.containerItem.resources)
     const value2String = props.containerItem.resources.requests.cpu.toString() + 'm'
     console.log(value2String)
     // console.log(value2String)

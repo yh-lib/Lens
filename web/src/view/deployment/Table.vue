@@ -1,8 +1,16 @@
 <script setup>
-  import { computed, ref } from 'vue'
+  import { computed, reactive, ref } from 'vue'
   import DialogByYaml from '../components/DialogByYaml.vue'
   import { obj2yaml } from '../../utils/typeConv/type.conv.js'
   import DialogHeaderLabel from '../components/DialogHeaderLabel.vue'
+  import DialogOfItem from '../components/workLoads/DialogOfItem.vue'
+  import { getdeploymentHandler } from '../../api/deployment.js'
+  import { useWorkLoadData } from '../../store/index.js'
+  import { storeToRefs } from 'pinia'
+
+  // store from pinia
+  const store = useWorkLoadData()
+  const { workLoadItem } = storeToRefs(store)
 
   const emit = defineEmits(['deleteItem'])
 
@@ -36,18 +44,7 @@
     return `${diffDays}天前`
   }
 
-  const props = defineProps({
-    tableData: {
-      type: Object,
-      default: () => ({
-        items: [],
-        item: {},
-        curClusterId: '',
-        curNsName: '',
-        search: '',
-      }),
-    },
-  })
+  const props = defineProps(['tableData'])
 
   // 搜索后的 pod 列表数据
   const filterTableData = computed(() =>
@@ -57,13 +54,90 @@
         item.metadata.name.toLowerCase().includes(props.tableData.search.toLowerCase())
     )
   )
-  const curItem = ref('')
-  const itemByYaml = ref('')
-  const itemDetailDialog = ref(false)
-  const getItem = (row) => {
-    curItem.value = row
-    itemByYaml.value = obj2yaml(row)
-    itemDetailDialog.value = true
+  // const curItem = ref('')
+  // const itemByYaml = ref('')
+  // const itemDetailDialog = ref(false)
+  // const getItem = (row) => {
+  //   curItem.value = row
+  //   itemByYaml.value = obj2yaml(row)
+  //   itemDetailDialog.value = true
+  // }
+
+  const mergeIfExists = (target, source) => {
+    Object.keys(source || {}).forEach((key) => {
+      const sourceValue = source[key]
+      const targetValue = target[key]
+
+      if (sourceValue === undefined) {
+        return
+      }
+
+      if (Array.isArray(sourceValue)) {
+        if (!Array.isArray(targetValue)) {
+          target[key] = sourceValue
+          return
+        }
+
+        target[key] = sourceValue.map((item, index) => {
+          const currentTargetItem = targetValue[index]
+
+          if (
+            item &&
+            typeof item === 'object' &&
+            !Array.isArray(item) &&
+            currentTargetItem &&
+            typeof currentTargetItem === 'object' &&
+            !Array.isArray(currentTargetItem)
+          ) {
+            return mergeIfExists(currentTargetItem, item)
+          }
+
+          return item
+        })
+        return
+      }
+
+      if (
+        sourceValue &&
+        typeof sourceValue === 'object' &&
+        !Array.isArray(sourceValue) &&
+        targetValue &&
+        typeof targetValue === 'object' &&
+        !Array.isArray(targetValue)
+      ) {
+        mergeIfExists(targetValue, sourceValue)
+        return
+      }
+
+      target[key] = sourceValue
+    })
+
+    return target
+  }
+
+  const updateItem = (row) => {
+    store.resetWorkLoadItem()
+    console.log('编辑Item:::', workLoadItem.value)
+    // 数据赋值
+    getdeploymentHandler(
+      props.tableData.clusterId,
+      props.tableData.nameSpace,
+      row.metadata.name
+    ).then((res) => {
+      if (res.data.status == 200) {
+        console.log('数据核对1:', workLoadItem.value)
+        mergeIfExists(workLoadItem.value.item, res.data.data.items)
+        console.log('数据核对2:', workLoadItem.value.item.spec.template.spec.imagePullSecrets)
+        data.updateItemDialogVisible = true
+      }
+    })
+  }
+
+  const data = reactive({
+    updateItemDialogVisible: false,
+  })
+  const closeDialogOfItem = () => {
+    data.updateItemDialogVisible = false
   }
 </script>
 
@@ -71,7 +145,7 @@
   <el-table :data="filterTableData" height="1010px">
     <el-table-column label="名称" prop="metadata.name" width="300px">
       <template #default="scope">
-        <el-button type="primary" link @click="getItem(scope.row)">{{
+        <el-button type="primary" link @click="updateItem(scope.row)">{{
           scope.row.metadata.name
         }}</el-button>
       </template>
@@ -98,12 +172,13 @@
     </el-table-column>
     <el-table-column label="操作" prop="operations">
       <template #default="scope">
+        <el-button link type="warning" @click="updateItem(scope.row)">编辑</el-button>
         <el-button link type="danger" @click="emit('deleteItem', scope.row)">删除</el-button>
       </template>
     </el-table-column>
   </el-table>
 
-  <DialogByYaml
+  <!-- <DialogByYaml
     :dialogVisible="itemDetailDialog"
     @closeDialog="itemDetailDialog = false"
     :item-by-yaml="itemByYaml"
@@ -117,5 +192,6 @@
         cur-resource-kind="Deployment"
       />
     </template>
-  </DialogByYaml>
+  </DialogByYaml> -->
+  <DialogOfItem :open-dialog="data.updateItemDialogVisible" @close-dialog="closeDialogOfItem" />
 </template>

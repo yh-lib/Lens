@@ -37,14 +37,7 @@
   const createItem = () => {
     // 同步子组件数据至模板
     syncToWorkLoadItem()
-    // 如果 imagePullSecrets 为空，则删除该字段，否则会报错
-    if (
-      workLoadItem.value.item.spec.template.spec.imagePullSecrets &&
-      workLoadItem.value.item.spec.template.spec.imagePullSecrets.length &&
-      workLoadItem.value.item.spec.template.spec.imagePullSecrets[0].name == ''
-    ) {
-      delete workLoadItem.value.item.spec.template.spec.imagePullSecrets
-    }
+
     // 调用后端接口 创建 Deployment
     createdeploymentHandler(getPostData(workLoadItem.value)).then((res) => {
       if (res.data.status === 200) {
