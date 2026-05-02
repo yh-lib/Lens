@@ -28,7 +28,6 @@
       { value: 'ClusterFirst' },
       { value: 'ClusterFirstWithHostNet' },
     ],
-    updatePlicyList: [{ value: 'RollingUpdate' }, { value: 'Recreate' }],
     imagePullPolicyList: [{ value: 'Never' }, { value: 'IfNotPresent' }, { value: 'Always' }],
     privateRepoSecretList: [],
     svcList: [],
@@ -50,14 +49,27 @@
   }
   // 切换更新策略
   const updatePoicySwitchFunc = () => {
-    const isRolling = workLoadItem.value.item.spec.strategy.type === 'RollingUpdate'
-    if (isRolling) {
-      workLoadItem.value.item.spec.strategy.rollingUpdate = {
-        maxUnavailable: '25%',
-        maxSurge: '25%',
+    if (props.resourceType == 'Deployment') {
+      const isRolling = workLoadItem.value.item.spec.strategy.type === 'RollingUpdate'
+      if (isRolling) {
+        workLoadItem.value.item.spec.strategy.rollingUpdate = {
+          maxUnavailable: '25%',
+          maxSurge: '25%',
+        }
+      } else {
+        delete workLoadItem.value.item.spec.strategy.rollingUpdate
       }
-    } else {
-      delete workLoadItem.value.item.spec.strategy.rollingUpdate
+    }
+    if (props.resourceType == 'StatefulSet') {
+      const isRolling = workLoadItem.value.item.spec.updateStrategy.type === 'RollingUpdate'
+      if (isRolling) {
+        workLoadItem.value.item.spec.updateStrategy.rollingUpdate = {
+          partition: 0,
+          maxUnavailable: '1',
+        }
+      } else {
+        delete workLoadItem.value.item.spec.updateStrategy.rollingUpdate
+      }
     }
   }
   // 切换主机网络
@@ -230,22 +242,39 @@
           <!-- 更新策略 -->
           <el-col :span="8" class="form-item">
             <el-form-item label="更新策略">
+              <!-- 资源类型为deployment时 -->
               <el-select
                 placeholder="请选择更新策略"
                 v-model="workLoadItem.item.spec.strategy.type"
                 @change="updatePoicySwitchFunc"
+                v-if="props.resourceType == 'Deployment'"
               >
                 <el-option
-                  v-for="item in data.updatePlicyList"
-                  :key="item.value"
-                  :label="item.value"
-                  :value="item.value"
+                  v-for="item in ['RollingUpdate', 'Recreate']"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                />
+              </el-select>
+              <!-- 资源类型为statefulset时 -->
+              <el-select
+                placeholder="请选择更新策略"
+                v-model="workLoadItem.item.spec.updateStrategy.type"
+                @change="updatePoicySwitchFunc"
+                v-if="props.resourceType == 'StatefulSet'"
+              >
+                <el-option
+                  v-for="item in ['RollingUpdate', 'OnDelete']"
+                  :key="item"
+                  :label="item"
+                  :value="item"
                 />
               </el-select>
             </el-form-item>
           </el-col>
           <!-- 更新策略 参数 -->
           <el-col :span="8" class="form-item">
+            <!-- deployment -->
             <div
               style="display: flex; justify-content: space-between"
               v-if="workLoadItem.item.spec.strategy.type == 'RollingUpdate'"
@@ -262,6 +291,26 @@
                   placeholder=""
                   style="width: 100px"
                   v-model="workLoadItem.item.spec.strategy.rollingUpdate.maxSurge"
+                />
+              </el-form-item>
+            </div>
+            <!-- statefulSet -->
+            <div
+              style="display: flex; justify-content: space-between"
+              v-if="workLoadItem.item.spec.updateStrategy.type == 'RollingUpdate'"
+            >
+              <el-form-item label="分区序号" label-width="100px">
+                <el-input
+                  placeholder=""
+                  style="width: 100px"
+                  v-model="workLoadItem.item.spec.updateStrategy.rollingUpdate.partition"
+                />
+              </el-form-item>
+              <el-form-item label="最大不可用" label-width="100px">
+                <el-input
+                  placeholder=""
+                  style="width: 100px"
+                  v-model="workLoadItem.item.spec.updateStrategy.rollingUpdate.maxUnavailable"
                 />
               </el-form-item>
             </div>

@@ -116,6 +116,10 @@ const defaultWorkLoadItem = () => ({
         type: '',
         rollingUpdate: {},
       },
+      updateStrategy: {
+        type: '',
+        rollingUpdate: {},
+      },
       revisionHistoryLimit: null,
       progressDeadlineSeconds: null,
     },
