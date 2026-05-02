@@ -54,6 +54,12 @@ export const API_CONFIG = {
   configMapGetApi: `${BASE_URL}/configMap/get`,
   configMapDeleteApi: `${BASE_URL}/configMap/delete`,
   configMapCreateApi: `${BASE_URL}/configMap/create`,
+  // service 管理
+  serviceListApi: `${BASE_URL}/service/list`,
+  serviceGetApi: `${BASE_URL}/service/get`,
+  serviceDeleteApi: `${BASE_URL}/service/delete`,
+  serviceCreateApi: `${BASE_URL}/service/create`,
+  serviceUpdateApi: `${BASE_URL}/service/update`,
 }
 
 export const CONFIG = {

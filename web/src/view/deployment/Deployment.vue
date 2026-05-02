@@ -79,6 +79,7 @@
   <DialogOfItem
     v-if="createItemDialogVisible"
     :open-dialog="createItemDialogVisible"
+    resource-type="Deployment"
     @close-dialog="closeDialogOfItem"
     @get-list="getList"
     action-method="create"

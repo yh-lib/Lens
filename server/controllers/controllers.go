@@ -140,6 +140,8 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 		configMap corev1.ConfigMap
 		secret    corev1.Secret
 		pvc       corev1.PersistentVolumeClaim
+		// 服务发布
+		service corev1.Service
 	)
 	returndata.Data = map[string]any{}
 	// 初始化 Item 类型
@@ -163,6 +165,9 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 		info.Item = &secret
 	case "pvc":
 		info.Item = &pvc
+		// 服务发布
+	case "service":
+		info.Item = &service
 	default:
 		logs.Error(nil, "不支持该资源类型")
 		return
@@ -190,6 +195,9 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 		kubeUtilser = kubeutils.NewSecret(kubeconfig, &secret)
 	case "pvc":
 		kubeUtilser = kubeutils.NewPersistentVolumeClaim(kubeconfig, &pvc)
+	// 服务发布
+	case "service":
+		kubeUtilser = kubeutils.NewService(kubeconfig, &service)
 	default:
 		logs.Error(nil, "不支持该资源类型")
 		return

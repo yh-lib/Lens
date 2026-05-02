@@ -27,6 +27,7 @@ const defaultWorkLoadItem = () => ({
           annotations: {},
         },
         spec: {
+          serviceName: '',
           nodeSelector: {},
           hostNetwork: false,
           containers: [

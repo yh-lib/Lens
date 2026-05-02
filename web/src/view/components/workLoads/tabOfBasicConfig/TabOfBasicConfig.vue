@@ -2,16 +2,18 @@
   import ElCard from '../../ElCard.vue'
   import { useWorkLoadData } from '../../../../store'
   import { storeToRefs } from 'pinia'
-  import { reactive } from 'vue'
+  import { onBeforeMount, reactive } from 'vue'
   import TableOfKeyValue from '../TableOfKeyValue.vue'
   import { getSecretListHandler } from '../../../../api/secret'
   import { ElMessage } from 'element-plus'
+  import Deployment from '../../../deployment/Deployment.vue'
+  import { getServiceListHandler } from '../../../../api/service'
 
   // store from pinia
   const store = useWorkLoadData()
   const { workLoadItem } = storeToRefs(store)
 
-  const props = defineProps(['actionMethod'])
+  const props = defineProps(['actionMethod', 'resourceType'])
   // 当前页面所需数据
   const data = reactive({
     // table 数据
@@ -29,6 +31,8 @@
     updatePlicyList: [{ value: 'RollingUpdate' }, { value: 'Recreate' }],
     imagePullPolicyList: [{ value: 'Never' }, { value: 'IfNotPresent' }, { value: 'Always' }],
     privateRepoSecretList: [],
+    svcList: [],
+    bindSvcValue: '',
   })
   // 控制器标签
   const addControllerLabelItem = () => {
@@ -67,8 +71,13 @@
   }
   // 从子组件 ELCard 中获取所需数据
   const getSelectValue = (selectValue) => {
+    console.log('ELCARD数据切换')
+    // 集群 or NS 切换后 数据重置
     data.privateRepoSecretList = []
-    delete workLoadItem.value.item.spec.template.spec.imagePullSecrets[0].name
+    data.svcList = []
+    workLoadItem.value.item.spec.template.spec.imagePullSecrets[0].name = ''
+    workLoadItem.value.item.spec.serviceName = ''
+
     Object.assign(workLoadItem.value, selectValue)
     getSecretListHandler(workLoadItem.value.clusterId, workLoadItem.value.nameSpace).then((res) => {
       if (res.data.status == 200) {
@@ -91,6 +100,41 @@
   // 暴露 data 给父组件
   defineExpose({
     data,
+  })
+
+  const getSvcList = () => {
+    data.svcList = []
+    getServiceListHandler(workLoadItem.value.clusterId, workLoadItem.value.nameSpace).then(
+      (res) => {
+        if (res.data.status == 200) {
+          res.data.data.items == null ||
+            res.data.data.items.forEach((item) => {
+              item.spec.clusterIP != 'None' ||
+                data.svcList.push({
+                  label: item.metadata.name,
+                  value: item.metadata.name,
+                })
+            })
+        }
+      }
+    )
+  }
+
+  const bindSvcValueChanged = () => {
+    if (data.bindSvcValue == 'autoCreateSvc') {
+      if (workLoadItem.value.item.metadata.name == '') {
+        data.bindSvcValue = ''
+        ElMessage.error('请先输入资源名称')
+      }
+      workLoadItem.value.item.spec.serviceName = workLoadItem.value.item.metadata.name
+    } else {
+      workLoadItem.value.item.spec.serviceName = ''
+      getSvcList()
+    }
+  }
+
+  onBeforeMount(() => {
+    workLoadItem.value.item.kind = props.resourceType
   })
 </script>
 
@@ -243,8 +287,31 @@
           </el-col>
           <!-- 自动添加 Servcie -->
           <el-col :span="8" class="form-item">
-            <el-form-item label="自动添加 Servcie">
+            <el-form-item label="自动添加 Servcie" v-if="props.resourceType == 'Deployment'">
               <el-switch v-model="data.switchAddService" />
+            </el-form-item>
+            <el-form-item label="绑定 Servcie" v-if="props.resourceType == 'StatefulSet'">
+              <el-radio-group v-model="data.bindSvcValue" @change="bindSvcValueChanged">
+                <el-radio value="autoCreateSvc">自动生成</el-radio>
+                <el-radio value="manualSelectSvc">手动选择</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label-width="0px" v-if="data.bindSvcValue == 'manualSelectSvc'">
+              <el-select
+                v-model="workLoadItem.item.spec.serviceName"
+                placeholder="请选择要绑定的无头服务"
+                style="width: 500px"
+                @visible-change="getSvcList"
+              >
+                <el-option
+                  v-for="item in data.svcList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>

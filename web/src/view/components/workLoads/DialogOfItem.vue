@@ -13,7 +13,7 @@
   import TabOfVolumeConfig from './tabOfVolumeConfig/tabOfVolumeConfig.vue'
   import TabOfContainer from './tabOfContainer/TabOfContainer.vue'
 
-  const props = defineProps(['openDialog', 'actionMethod'])
+  const props = defineProps(['openDialog', 'actionMethod', 'resourceType'])
   const emit = defineEmits(['closeDialog', 'getList'])
   const activeName = ref('Basic')
 
@@ -155,6 +155,12 @@
     workLoadItem.value.item.spec.template.spec.volumes.forEach((item) => {
       item?.emptyDir?.medium == 'Disk' && delete item.emptyDir.medium
     })
+    // 基本配置组件： 绑定 service
+    if (basicRef.value.data.bindSvcValue == 'autoCreateSvc') {
+      console.log('autoCreateSvc')
+    } else {
+      console.log('manualCreateSvc')
+    }
   }
 </script>
 
@@ -169,7 +175,11 @@
   >
     <el-tabs v-model="activeName" @tab-click="getItemOfYaml">
       <el-tab-pane label="基本配置" name="Basic">
-        <TabOfBasicConfig ref="basicRef" :actionMethod="props.actionMethod" />
+        <TabOfBasicConfig
+          ref="basicRef"
+          :actionMethod="props.actionMethod"
+          :resource-type="props.resourceType"
+        />
       </el-tab-pane>
       <el-tab-pane label="调度配置" name="Schedule">
         <TabOfScheduleConfig ref="scheduleRef" />

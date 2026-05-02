@@ -4,6 +4,13 @@
   import { onBeforeMount, reactive } from 'vue'
   import { getClusterListHandler } from '../../api/cluster.js'
   import { getNamespaceListHandler } from '../../api/namespace.js'
+  // store from pinia
+  import { useWorkLoadData } from '../../store'
+  import { storeToRefs } from 'pinia'
+
+  // store from pinia
+  const store = useWorkLoadData()
+  const { workLoadItem } = storeToRefs(store)
 
   const emit = defineEmits(['change', 'refresh', 'createItem'])
 

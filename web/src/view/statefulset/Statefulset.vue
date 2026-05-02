@@ -77,10 +77,10 @@
 
   <!-- 创建 item 按钮 -->
   <DialogOfItem
-    v-if="createItemDialogVisible"
     :open-dialog="createItemDialogVisible"
+    resource-type="StatefulSet"
+    action-method="create"
     @close-dialog="closeDialogOfItem"
     @get-list="getList"
-    action-method="create"
   />
 </template>
