@@ -9,6 +9,7 @@ import (
 	"github.com/dotbalo/kubeutils/kubeutils"
 	"github.com/gin-gonic/gin"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -142,6 +143,8 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 		pvc       corev1.PersistentVolumeClaim
 		// 服务发布
 		service corev1.Service
+		// 任务
+		cronJob batchv1.CronJob
 	)
 	returndata.Data = map[string]any{}
 	// 初始化 Item 类型
@@ -165,9 +168,12 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 		info.Item = &secret
 	case "pvc":
 		info.Item = &pvc
-		// 服务发布
+	// 服务发布
 	case "service":
 		info.Item = &service
+	// 任务
+	case "cronJob":
+		info.Item = &cronJob
 	default:
 		logs.Error(nil, "不支持该资源类型")
 		return
@@ -198,6 +204,9 @@ func KubectlFunc(c *gin.Context, resourceType string, opMethod string) {
 	// 服务发布
 	case "service":
 		kubeUtilser = kubeutils.NewService(kubeconfig, &service)
+	// 任务
+	case "cronJob":
+		kubeUtilser = kubeutils.NewCronJob(kubeconfig, &cronJob)
 	default:
 		logs.Error(nil, "不支持该资源类型")
 		return

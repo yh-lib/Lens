@@ -21,6 +21,7 @@ const defaultWorkLoadItem = () => ({
       selector: {
         matchLabels: {},
       },
+      // pod 配置
       template: {
         metadata: {
           labels: {},
@@ -113,6 +114,7 @@ const defaultWorkLoadItem = () => ({
           imagePullSecrets: [{ name: '' }],
         },
       },
+      // 更新 配置
       strategy: {
         type: '',
         rollingUpdate: {},
@@ -121,8 +123,6 @@ const defaultWorkLoadItem = () => ({
         type: '',
         rollingUpdate: {},
       },
-      revisionHistoryLimit: null,
-      progressDeadlineSeconds: null,
     },
   },
 })
