@@ -4,7 +4,7 @@
   import { reactive, ref } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import DialogOfItem from '../components/workLoads/DialogOfItem.vue'
-  import { deleteStatefulSetHandler, getStatefulSetListHandler } from '../../api/statefuleSet'
+  import { deleteHandler, getListHandler } from '../../api/generic'
 
   // 删除 statefulSet
   const deleteItem = (row) => {
@@ -15,15 +15,17 @@
       type: 'warning',
     })
       .then(() => {
-        deleteStatefulSetHandler(data.clusterId, data.nameSpace, row.metadata.name).then((res) => {
-          if (res.data.status == 200) {
-            ElMessage({
-              type: 'success',
-              message: res.data.message,
-            })
-            getList()
+        deleteHandler(data.clusterId, data.nameSpace, 'statefulSet', row.metadata.name).then(
+          (res) => {
+            if (res.data.status == 200) {
+              ElMessage({
+                type: 'success',
+                message: res.data.message,
+              })
+              getList()
+            }
           }
-        })
+        )
       })
       .catch(() => {
         return
@@ -36,7 +38,7 @@
       data.items = []
       return
     }
-    getStatefulSetListHandler(data.clusterId, data.nameSpace).then((res) => {
+    getListHandler(data.clusterId, data.nameSpace, 'statefulSet').then((res) => {
       data.items = res.data.data.items || []
     })
   }
@@ -78,7 +80,7 @@
   <!-- 创建 item 按钮 -->
   <DialogOfItem
     :open-dialog="createItemDialogVisible"
-    resource-type="StatefulSet"
+    resource-type="statefulSet"
     action-method="create"
     @close-dialog="closeDialogOfItem"
     @get-list="getList"

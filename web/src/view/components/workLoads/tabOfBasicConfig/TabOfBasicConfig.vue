@@ -180,7 +180,11 @@
     // apiversion
     switch (props.resourceType) {
       case 'deployment':
+        workLoadItem.value.item.apiVersion = 'apps/v1'
+        break
       case 'statefulSet':
+        workLoadItem.value.item.apiVersion = 'apps/v1'
+        break
       case 'daemonSet':
         workLoadItem.value.item.apiVersion = 'apps/v1'
         break
@@ -455,20 +459,22 @@
             <!-- statefulSet -->
             <div
               style="display: flex; justify-content: space-between"
-              v-if="props.resourceType == 'StatefulSet'"
+              v-if="props.resourceType == 'statefulSet'"
             >
               <el-form-item label="分区序号" label-width="100px">
                 <el-input
                   placeholder=""
                   style="width: 100px"
-                  v-model="workLoadItem.item.spec.updateStrategy.rollingUpdate.partition"
+                  v-model.number="workLoadItem.item.spec.updateStrategy.rollingUpdate.partition"
                 />
               </el-form-item>
               <el-form-item label="最大不可用" label-width="100px">
                 <el-input
                   placeholder=""
                   style="width: 100px"
-                  v-model="workLoadItem.item.spec.updateStrategy.rollingUpdate.maxUnavailable"
+                  v-model.number="
+                    workLoadItem.item.spec.updateStrategy.rollingUpdate.maxUnavailable
+                  "
                 />
               </el-form-item>
             </div>

@@ -4,10 +4,9 @@
   import { obj2yaml } from '../../utils/typeConv/type.conv.js'
   import DialogHeaderLabel from '../components/DialogHeaderLabel.vue'
   import DialogOfItem from '../components/workLoads/DialogOfItem.vue'
-  import { getdeploymentHandler } from '../../api/deployment.js'
   import { useWorkLoadData } from '../../store/index.js'
   import { storeToRefs } from 'pinia'
-  import { getStatefulSetHandler } from '../../api/statefuleSet.js'
+  import { getHandler } from '../../api/generic.js'
 
   // store from pinia
   const store = useWorkLoadData()
@@ -56,8 +55,70 @@
     )
   )
 
+  // const mergeIfExists = (target, source) => {
+  //   Object.keys(source || {}).forEach((key) => {
+  //     if (!(key in target)) {
+  //       return
+  //     }
+
+  //     const sourceValue = source[key]
+  //     const targetValue = target[key]
+
+  //     if (sourceValue === undefined) {
+  //       return
+  //     }
+
+  //     if (Array.isArray(sourceValue)) {
+  //       if (!Array.isArray(targetValue)) {
+  //         return
+  //       }
+
+  //       target[key] = sourceValue
+  //         .map((item, index) => {
+  //           const currentTargetItem = targetValue[index]
+
+  //           if (currentTargetItem === undefined) {
+  //             return currentTargetItem
+  //           }
+
+  //           if (
+  //             item &&
+  //             typeof item === 'object' &&
+  //             !Array.isArray(item) &&
+  //             currentTargetItem &&
+  //             typeof currentTargetItem === 'object' &&
+  //             !Array.isArray(currentTargetItem)
+  //           ) {
+  //             return mergeIfExists(currentTargetItem, item)
+  //           }
+
+  //           return currentTargetItem === undefined ? currentTargetItem : item
+  //         })
+  //         .filter((item) => item !== undefined)
+  //       return
+  //     }
+
+  //     if (
+  //       sourceValue &&
+  //       typeof sourceValue === 'object' &&
+  //       !Array.isArray(sourceValue) &&
+  //       targetValue &&
+  //       typeof targetValue === 'object' &&
+  //       !Array.isArray(targetValue)
+  //     ) {
+  //       mergeIfExists(targetValue, sourceValue)
+  //       return
+  //     }
+
+  //     target[key] = sourceValue
+  //   })
+
+  //   return target
+  // }
+
   const mergeIfExists = (target, source) => {
     Object.keys(source || {}).forEach((key) => {
+      // console.log('遍历source_key:::', key)
       if (!(key in target)) {
         return
       }
@@ -65,6 +126,10 @@
       const sourceValue = source[key]
       const targetValue = target[key]
 
+      if (key === 'labels' || key === 'annotations') {
+        target[key] = sourceValue
+        return
+      }
       if (sourceValue === undefined) {
         return
       }
@@ -99,14 +164,7 @@
         return
       }
 
-      if (
-        sourceValue &&
-        typeof sourceValue === 'object' &&
-        !Array.isArray(sourceValue) &&
-        targetValue &&
-        typeof targetValue === 'object' &&
-        !Array.isArray(targetValue)
-      ) {
+      if (typeof sourceValue === 'object' && typeof targetValue === 'object') {
         mergeIfExists(targetValue, sourceValue)
         return
       }
@@ -117,18 +175,24 @@
     return target
   }
 
-  const updateItem = (row) => {
+  const getItem = (row) => {
     // 重置模板
     store.resetWorkLoadItem()
     // 模板赋值
-    getStatefulSetHandler(
+    getHandler(
       props.tableData.clusterId,
       props.tableData.nameSpace,
+      'statefulSet',
       row.metadata.name
     ).then((res) => {
       if (res.data.status == 200) {
         workLoadItem.value.name = row.metadata.name
         mergeIfExists(workLoadItem.value.item, res.data.data.items)
+        console.log(
+          'sts数据:::',
+          res.data.data.items.spec.updateStrategy,
+          workLoadItem.value.item.spec.updateStrategy
+        )
         data.actionMethod = 'update'
         data.updateItemDialogVisible = true
       }
@@ -149,7 +213,7 @@
   <el-table :data="filterTableData" height="1010px">
     <el-table-column label="名称" prop="metadata.name" width="300px">
       <template #default="scope">
-        <el-button type="primary" link @click="updateItem(scope.row)">{{
+        <el-button type="primary" link @click="getItem(scope.row)">{{
           scope.row.metadata.name
         }}</el-button>
       </template>
@@ -178,7 +242,7 @@
     </el-table-column>
     <el-table-column label="操作" prop="operations">
       <template #default="scope">
-        <el-button link type="warning" @click="updateItem(scope.row)">编辑</el-button>
+        <el-button link type="warning" @click="getItem(scope.row)">编辑</el-button>
         <el-button link type="danger" @click="emit('deleteItem', scope.row)">删除</el-button>
       </template>
     </el-table-column>
@@ -188,6 +252,6 @@
     @close-dialog="closeDialogOfItem"
     @get-list="emit('getList')"
     :actionMethod="data.actionMethod"
-    resource-type="StatefulSet"
+    resource-type="statefulSet"
   />
 </template>

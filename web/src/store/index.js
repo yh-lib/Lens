@@ -228,7 +228,10 @@ const defaultWorkLoadItem = () => ({
       },
       updateStrategy: {
         type: '',
-        rollingUpdate: {},
+        rollingUpdate: {
+          partition: null,
+          maxUnavailable: null,
+        },
       },
     },
   },
