@@ -37,7 +37,6 @@
       return
     }
 
-    console.log('当前data数据:::', data)
     getListHandler(data.clusterId, data.nameSpace, 'cronJob').then((res) => {
       data.items = res.data.data.items || []
     })

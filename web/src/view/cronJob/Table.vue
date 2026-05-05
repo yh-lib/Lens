@@ -118,7 +118,7 @@
     return target
   }
 
-  const updateItem = (row) => {
+  const getItem = (row) => {
     // 重置模板
     store.resetWorkLoadItem()
     // 模板赋值
@@ -161,7 +161,7 @@
   <el-table :data="filterTableData" height="1010px">
     <el-table-column label="名称" prop="metadata.name" width="300px">
       <template #default="scope">
-        <el-button type="primary" link @click="updateItem(scope.row)">{{
+        <el-button type="primary" link @click="getItem(scope.row)">{{
           scope.row.metadata.name
         }}</el-button>
       </template>
@@ -183,7 +183,7 @@
     </el-table-column>
     <el-table-column label="操作" prop="operations">
       <template #default="scope">
-        <el-button link type="warning" @click="updateItem(scope.row)">编辑</el-button>
+        <el-button link type="warning" @click="getItem(scope.row)">编辑</el-button>
         <el-button link type="danger" @click="emit('deleteItem', scope.row)">删除</el-button>
       </template>
     </el-table-column>

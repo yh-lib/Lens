@@ -4,7 +4,7 @@
   import { reactive, ref } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import DialogOfItem from '../components/workLoads/DialogOfItem.vue'
-  import { deleteDaemonSetHandler, getDaemonSetListHandler } from '../../api/daemonSet.js'
+  import { deleteHandler, getListHandler } from '../../api/generic.js'
 
   // 删除 DaemonSet
   const deleteItem = (row) => {
@@ -15,15 +15,17 @@
       type: 'warning',
     })
       .then(() => {
-        deleteDaemonSetHandler(data.clusterId, data.nameSpace, row.metadata.name).then((res) => {
-          if (res.data.status == 200) {
-            ElMessage({
-              type: 'success',
-              message: res.data.message,
-            })
-            getList()
+        deleteHandler(data.clusterId, data.nameSpace, 'daemonSet', row.metadata.name).then(
+          (res) => {
+            if (res.data.status == 200) {
+              ElMessage({
+                type: 'success',
+                message: res.data.message,
+              })
+              getList()
+            }
           }
-        })
+        )
       })
       .catch(() => {
         return
@@ -36,7 +38,7 @@
       data.items = []
       return
     }
-    getDaemonSetListHandler(data.clusterId, data.nameSpace).then((res) => {
+    getListHandler(data.clusterId, data.nameSpace, 'daemonSet').then((res) => {
       data.items = res.data.data.items || []
     })
   }
@@ -78,7 +80,7 @@
   <!-- 创建 item 按钮 -->
   <DialogOfItem
     :open-dialog="createItemDialogVisible"
-    resource-type="DaemonSet"
+    resource-type="daemonSet"
     action-method="create"
     @close-dialog="closeDialogOfItem"
     @get-list="getList"

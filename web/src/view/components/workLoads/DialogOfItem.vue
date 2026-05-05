@@ -1,6 +1,5 @@
 <script setup>
   import { ref } from 'vue'
-  import { createdeploymentHandler, updateDeploymentHandler } from '../../../api/deployment'
   import { ElMessage } from 'element-plus'
   import { list2obj } from '../../../utils/typeConv/type.conv'
   import { useWorkLoadData } from '../../../store'
@@ -13,8 +12,6 @@
   import TabOfVolumeConfig from './tabOfVolumeConfig/tabOfVolumeConfig.vue'
   import TabOfContainer from './tabOfContainer/TabOfContainer.vue'
   import Deployment from '../../deployment/Deployment.vue'
-  import { createStatefulSetHandler } from '../../../api/statefuleSet'
-  import { createDaemonSetHandler } from '../../../api/daemonSet'
   import { createHandler, updateHandler } from '../../../api/generic'
 
   const props = defineProps(['openDialog', 'actionMethod', 'resourceType'])
@@ -216,15 +213,19 @@
       workLoadItem.value.item.spec.template.metadata.labels.app =
         workLoadItem.value.item.metadata.name
     } else {
+      // 手动配置标签、注释
+      // 控制器
       workLoadItem.value.item.metadata.labels = list2obj(basicRef.value.data.controllerLabelsList)
-      workLoadItem.value.item.spec.selector.matchLabels = list2obj(
-        basicRef.value.data.controllerLabelsList
-      )
-      workLoadItem.value.item.spec.template.metadata.labels = list2obj(
-        basicRef.value.data.controllerLabelsList
-      )
       workLoadItem.value.item.metadata.annotations = list2obj(
         basicRef.value.data.controllerAnnotationsList
+      )
+      // 选择器
+      workLoadItem.value.item.spec.selector.matchLabels = list2obj(
+        basicRef.value.data.podLabelsList
+      )
+      // pod
+      workLoadItem.value.item.spec.template.metadata.labels = list2obj(
+        basicRef.value.data.podLabelsList
       )
     }
     // 调度组件数据

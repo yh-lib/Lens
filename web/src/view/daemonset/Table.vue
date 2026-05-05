@@ -7,7 +7,7 @@
   import { getdeploymentHandler } from '../../api/deployment.js'
   import { useWorkLoadData } from '../../store/index.js'
   import { storeToRefs } from 'pinia'
-  import { getDaemonSetHandler } from '../../api/daemonSet.js'
+  import { getHandler, getListHandler } from '../../api/generic.js'
 
   // store from pinia
   const store = useWorkLoadData()
@@ -115,13 +115,14 @@
     return target
   }
 
-  const updateItem = (row) => {
+  const getItem = (row) => {
     // 重置模板
     store.resetWorkLoadItem()
     // 模板赋值
-    getDaemonSetHandler(
+    getHandler(
       props.tableData.clusterId,
       props.tableData.nameSpace,
+      'daemonSet',
       row.metadata.name
     ).then((res) => {
       if (res.data.status == 200) {
@@ -147,7 +148,7 @@
   <el-table :data="filterTableData" height="1010px">
     <el-table-column label="名称" prop="metadata.name" width="300px">
       <template #default="scope">
-        <el-button type="primary" link @click="updateItem(scope.row)">{{
+        <el-button type="primary" link @click="getItem(scope.row)">{{
           scope.row.metadata.name
         }}</el-button>
       </template>
@@ -176,7 +177,7 @@
     </el-table-column>
     <el-table-column label="操作" prop="operations">
       <template #default="scope">
-        <el-button link type="warning" @click="updateItem(scope.row)">编辑</el-button>
+        <el-button link type="warning" @click="getItem(scope.row)">编辑</el-button>
         <el-button link type="danger" @click="emit('deleteItem', scope.row)">删除</el-button>
       </template>
     </el-table-column>
@@ -186,6 +187,6 @@
     @close-dialog="closeDialogOfItem"
     @get-list="emit('getList')"
     :actionMethod="data.actionMethod"
-    resource-type="DaemonSet"
+    resource-type="daemonSet"
   />
 </template>

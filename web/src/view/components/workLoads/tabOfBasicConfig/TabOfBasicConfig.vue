@@ -22,6 +22,8 @@
     // table 数据
     controllerLabelsList: [],
     controllerAnnotationsList: [],
+    podLabelsList: [],
+    podAnnotationsList: [],
     // switch 状态
     switchAddService: false,
     labelsAndAnnotationsSwtich: '',
@@ -50,9 +52,23 @@
   const deleteControllerAnnotationItem = (index) => {
     data.controllerAnnotationsList.splice(index, 1)
   }
+  // Pod 标签
+  const addPodLabelItem = () => {
+    data.podLabelsList.unshift({ key: '', value: '' })
+  }
+  const deletePodLabelItem = (index) => {
+    data.podLabelsList.splice(index, 1)
+  }
+  // Pod 注释
+  const addPodAnnotationItem = () => {
+    data.controllerAnnotationsList.unshift({ key: '', value: '' })
+  }
+  const deletePodAnnotationItem = (index) => {
+    data.controllerAnnotationsList.splice(index, 1)
+  }
   // 切换更新策略
   const updatePoicySwitchFunc = () => {
-    if (props.resourceType == 'Deployment') {
+    if (props.resourceType == 'deployment') {
       const isRolling = workLoadItem.value.item.spec.strategy.type === 'RollingUpdate'
       if (isRolling) {
         workLoadItem.value.item.spec.strategy.rollingUpdate = {
@@ -63,7 +79,7 @@
         delete workLoadItem.value.item.spec.strategy.rollingUpdate
       }
     }
-    if (props.resourceType == 'StatefulSet') {
+    if (props.resourceType == 'statefulSet') {
       const isRolling = workLoadItem.value.item.spec.updateStrategy.type === 'RollingUpdate'
       if (isRolling) {
         workLoadItem.value.item.spec.updateStrategy.rollingUpdate = {
@@ -74,7 +90,7 @@
         delete workLoadItem.value.item.spec.updateStrategy.rollingUpdate
       }
     }
-    if (props.resourceType == 'DaemonSet') {
+    if (props.resourceType == 'daemonSet') {
       const isRolling = workLoadItem.value.item.spec.updateStrategy.type === 'RollingUpdate'
       if (isRolling) {
         workLoadItem.value.item.spec.updateStrategy.rollingUpdate = {
@@ -184,8 +200,12 @@
     }
     if (props.actionMethod == 'update') {
       data.labelsAndAnnotationsSwtich = 'manual'
+      // 控制器标签、注释
       data.controllerLabelsList = obj2list(workLoadItem.value.item.metadata.labels)
       data.controllerAnnotationsList = obj2list(workLoadItem.value.item.metadata.annotations)
+      // Pod 标签、注释
+      data.podLabelsList = obj2list(workLoadItem.value.item.spec.template.metadata.labels)
+      data.podAnnotationsList = obj2list(workLoadItem.value.item.spec.template.metadata.annotations)
     }
   })
 </script>
@@ -216,7 +236,7 @@
           <!-- 副本数 -->
           <el-col
             :span="8"
-            v-if="props.resourceType == 'Deployment' || props.resourceType == 'StatefulSet'"
+            v-if="props.resourceType == 'deployment' || props.resourceType == 'statefulSet'"
           >
             <el-form-item label="副本数">
               <el-input
@@ -303,13 +323,13 @@
             </el-form-item>
           </el-col>
           <!-- 调度周期 -->
-          <el-col :span="8">
+          <el-col :span="8" v-if="props.resourceType == 'cronJob'">
             <el-form-item label="调度周期" required>
               <el-input placeholder="请配置调度周期" v-model="workLoadItem.item.spec.schedule" />
             </el-form-item>
           </el-col>
           <!-- 并发策略 -->
-          <el-col :span="8">
+          <el-col :span="8" v-if="props.resourceType == 'cronJob'">
             <el-form-item label="并发策略">
               <el-select
                 placeholder="请选择并发策略"
@@ -379,7 +399,7 @@
                 placeholder="请选择更新策略"
                 v-model="workLoadItem.item.spec.strategy.type"
                 @change="updatePoicySwitchFunc"
-                v-if="props.resourceType == 'Deployment'"
+                v-if="props.resourceType == 'deployment'"
               >
                 <el-option
                   v-for="item in ['RollingUpdate', 'Recreate']"
@@ -393,7 +413,7 @@
                 placeholder="请选择更新策略"
                 v-model="workLoadItem.item.spec.updateStrategy.type"
                 @change="updatePoicySwitchFunc"
-                v-if="props.resourceType == 'StatefulSet' || props.resourceType == 'DaemonSet'"
+                v-if="props.resourceType == 'statefulSet' || props.resourceType == 'daemonSet'"
               >
                 <el-option
                   v-for="item in ['RollingUpdate', 'OnDelete']"
@@ -415,7 +435,7 @@
             <!-- deployment -->
             <div
               style="display: flex; justify-content: space-between"
-              v-if="props.resourceType == 'Deployment'"
+              v-if="props.resourceType == 'deployment'"
             >
               <el-form-item label="最大不可用" label-width="100px">
                 <el-input
@@ -455,7 +475,7 @@
             <!-- DaemonSet -->
             <div
               style="display: flex; justify-content: space-between"
-              v-if="props.resourceType == 'DaemonSet'"
+              v-if="props.resourceType == 'daemonSet'"
             >
               <el-form-item label="最大不可用" label-width="150px">
                 <el-input
@@ -467,7 +487,7 @@
             </div>
           </el-col>
           <!-- 使用宿主机网络 -->
-          <el-col :span="8" v-if="props.resourceType != 'CronJob'">
+          <el-col :span="8" v-if="props.resourceType != 'cronJob'">
             <el-form-item label="使用宿主机网络">
               <el-switch
                 v-model="workLoadItem.item.spec.template.spec.hostNetwork"
@@ -487,10 +507,10 @@
           </el-col>
           <!-- 自动添加 Servcie -->
           <el-col :span="8">
-            <el-form-item label="自动添加 Servcie" v-if="props.resourceType == 'Deployment'">
+            <el-form-item label="自动添加 Servcie" v-if="props.resourceType == 'deployment'">
               <el-switch v-model="data.switchAddService" />
             </el-form-item>
-            <el-form-item label="绑定 Servcie" v-if="props.resourceType == 'StatefulSet'">
+            <el-form-item label="绑定 Servcie" v-if="props.resourceType == 'statefulSet'">
               <el-radio-group v-model="data.bindSvcValue" @change="bindSvcValueChanged">
                 <el-radio value="autoCreateSvc">自动生成</el-radio>
                 <el-radio value="manualSelectSvc">手动选择</el-radio>
@@ -523,20 +543,36 @@
           class="no-border-input"
           v-if="data.labelsAndAnnotationsSwtich == 'manual'"
         >
-          <!-- 标签 -->
-          <el-tab-pane label="标签">
+          <!-- 控制器标签 -->
+          <el-tab-pane label="控制器标签">
             <TableOfKeyValue
               :table-list="data.controllerLabelsList"
               @add-table-row="addControllerLabelItem"
               @delete-table-row="deleteControllerLabelItem"
             />
           </el-tab-pane>
-          <!-- 注释 -->
-          <el-tab-pane label="注释">
+          <!-- 控制器注释 -->
+          <el-tab-pane label="控制器注释">
             <TableOfKeyValue
               :table-list="data.controllerAnnotationsList"
               @add-table-row="addControllerAnnotationItem"
               @delete-table-row="deleteControllerAnnotationItem"
+            />
+          </el-tab-pane>
+          <!-- pod标签 -->
+          <el-tab-pane label="Pod 标签">
+            <TableOfKeyValue
+              :table-list="data.podLabelsList"
+              @add-table-row="addPodLabelItem"
+              @delete-table-row="deletePodLabelItem"
+            />
+          </el-tab-pane>
+          <!-- pod注释 -->
+          <el-tab-pane label="Pod 注释">
+            <TableOfKeyValue
+              :table-list="data.podAnnotationsList"
+              @add-table-row="addPodAnnotationItem"
+              @delete-table-row="deletePodAnnotationItem"
             />
           </el-tab-pane>
         </el-tabs>
