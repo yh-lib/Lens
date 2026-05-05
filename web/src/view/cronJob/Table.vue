@@ -7,8 +7,8 @@
   import { getdeploymentHandler } from '../../api/deployment.js'
   import { useWorkLoadData } from '../../store/index.js'
   import { storeToRefs } from 'pinia'
-  import { getCronJobHandler } from '../../api/cronJob.js'
   import { ElMessage } from 'element-plus'
+  import { getHandler } from '../../api/generic.js'
 
   // store from pinia
   const store = useWorkLoadData()
@@ -122,16 +122,19 @@
     // 重置模板
     store.resetWorkLoadItem()
     // 模板赋值
-    getCronJobHandler(props.tableData.clusterId, props.tableData.nameSpace, row.metadata.name).then(
-      (res) => {
-        if (res.data.status == 200) {
-          workLoadItem.value.name = row.metadata.name
-          mergeIfExists(workLoadItem.value.item, res.data.data.items)
-          data.actionMethod = 'update'
-          data.updateItemDialogVisible = true
-        }
+    getHandler(
+      props.tableData.clusterId,
+      props.tableData.nameSpace,
+      'cronJob',
+      row.metadata.name
+    ).then((res) => {
+      if (res.data.status == 200) {
+        workLoadItem.value.name = row.metadata.name
+        mergeIfExists(workLoadItem.value.item, res.data.data.items)
+        data.actionMethod = 'update'
+        data.updateItemDialogVisible = true
       }
-    )
+    })
   }
 
   const data = reactive({
@@ -190,6 +193,6 @@
     @close-dialog="closeDialogOfItem"
     @get-list="emit('getList')"
     :actionMethod="data.actionMethod"
-    resource-type="CronJob"
+    resource-type="cronJob"
   />
 </template>

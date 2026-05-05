@@ -4,8 +4,7 @@
   import { reactive, ref } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import DialogOfItem from '../components/workLoads/DialogOfItem.vue'
-  import { deleteCronJobHandler, getCronJobListHandler } from '../../api/cronJob.js'
-  import { getListHandler } from '../../api/generic.js'
+  import { deleteHandler, getListHandler } from '../../api/generic.js'
 
   // 删除 CronJob
   const deleteItem = (row) => {
@@ -16,7 +15,7 @@
       type: 'warning',
     })
       .then(() => {
-        deleteCronJobHandler(data.clusterId, data.nameSpace, row.metadata.name).then((res) => {
+        deleteHandler(data.clusterId, data.nameSpace, 'cronJob', row.metadata.name).then((res) => {
           if (res.data.status == 200) {
             ElMessage({
               type: 'success',
@@ -37,6 +36,8 @@
       data.items = []
       return
     }
+
+    console.log('当前data数据:::', data)
     getListHandler(data.clusterId, data.nameSpace, 'cronJob').then((res) => {
       data.items = res.data.data.items || []
     })
@@ -79,7 +80,7 @@
   <!-- 创建 item 按钮 -->
   <DialogOfItem
     :open-dialog="createItemDialogVisible"
-    resource-type="CronJob"
+    resource-type="cronJob"
     action-method="create"
     @close-dialog="closeDialogOfItem"
     @get-list="getList"

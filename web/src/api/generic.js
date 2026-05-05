@@ -6,17 +6,19 @@ const BASE_URL = import.meta.env.VITE_BASE_URL
 // create
 export const createHandler = (resourceType, itemForm) => {
   const fullUrl = BASE_URL + '/' + resourceType + '/' + 'create'
-  return request(fullUrl, itemForm, 'create')
+  console.log('执行创建逻辑', itemForm)
+
+  return request(fullUrl, itemForm, 'post')
 }
 // delete
 export const deleteHandler = (clusterId, nameSpace, resourceType, name) => {
   const fullUrl = BASE_URL + '/' + resourceType + '/' + 'delete'
-  return request(fullUrl, { clusterId, nameSpace, name }, 'delete')
+  return request(fullUrl, { clusterId, nameSpace, name }, 'post')
 }
 // update
 export const updateHandler = (resourceType, itemForm) => {
   const fullUrl = BASE_URL + '/' + resourceType + '/' + 'update'
-  return request(fullUrl, itemForm, 'update')
+  return request(fullUrl, itemForm, 'post')
 }
 // select
 export const getListHandler = (clusterId, nameSpace, resourceType) => {
@@ -25,5 +27,6 @@ export const getListHandler = (clusterId, nameSpace, resourceType) => {
 }
 export const getHandler = (clusterId, nameSpace, resourceType, name) => {
   const fullUrl = BASE_URL + '/' + resourceType + '/' + 'get'
+  console.log('请求参数：：：', clusterId, nameSpace, name)
   return request(fullUrl, { clusterId, nameSpace, name }, 'get')
 }

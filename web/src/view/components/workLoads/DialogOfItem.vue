@@ -15,7 +15,7 @@
   import Deployment from '../../deployment/Deployment.vue'
   import { createStatefulSetHandler } from '../../../api/statefuleSet'
   import { createDaemonSetHandler } from '../../../api/daemonSet'
-  import { createCronJobHandler } from '../../../api/cronJob'
+  import { createHandler, updateHandler } from '../../../api/generic'
 
   const props = defineProps(['openDialog', 'actionMethod', 'resourceType'])
   const emit = defineEmits(['closeDialog', 'getList'])
@@ -41,73 +41,93 @@
   const createItem = () => {
     // 同步子组件数据至模板
     syncToWorkLoadItem()
-
-    switch (props.resourceType) {
-      case 'Deployment':
-        // 调用后端接口 创建 Deployment
-        createdeploymentHandler(getPostData(workLoadItem.value)).then((res) => {
-          if (res.data.status === 200) {
-            ElMessage({
-              message: res.data.message,
-              type: 'success',
-            })
-            emit('getList')
-            handleClose()
-          }
-        })
-        break
-      case 'StatefulSet':
-        // 调用后端接口 创建 statefulSet
-        createStatefulSetHandler(getPostData(workLoadItem.value)).then((res) => {
-          if (res.data.status === 200) {
-            ElMessage({
-              message: res.data.message,
-              type: 'success',
-            })
-            emit('getList')
-            handleClose()
-          }
-        })
-        break
-      case 'DaemonSet':
-        // 调用后端接口 创建 DaemonSet
-        createDaemonSetHandler(getPostData(workLoadItem.value)).then((res) => {
-          if (res.data.status === 200) {
-            ElMessage({
-              message: res.data.message,
-              type: 'success',
-            })
-            emit('getList')
-            handleClose()
-          }
-        })
-        break
-      case 'CronJob':
-        // 调用后端接口 创建 CronJob
-        const sourceData = JSON.parse(JSON.stringify(workLoadItem.value))
-        delete sourceData.item.spec.template
-
-        createCronJobHandler(getPostData(sourceData)).then((res) => {
-          if (res.data.status === 200) {
-            ElMessage({
-              message: res.data.message,
-              type: 'success',
-            })
-            emit('getList')
-            handleClose()
-          }
-        })
-        break
-      default:
-        ElMessage.error('暂不支持该资源类型')
-        break
+    // console.log(workLoadItem.value)
+    const itemForm = getPostData(workLoadItem.value)
+    if (props.resourceType == 'cronJob') {
+      delete itemForm.item.spec.template
     }
+    // 调用后端接口 创建 资源
+    createHandler(props.resourceType, itemForm).then((res) => {
+      if (res.data.status === 200) {
+        ElMessage({
+          message: res.data.message,
+          type: 'success',
+        })
+        emit('getList')
+        handleClose()
+      }
+    })
+
+    // switch (props.resourceType) {
+    //   case 'Deployment':
+    //     // 调用后端接口 创建 Deployment
+    //     createdeploymentHandler(getPostData(workLoadItem.value)).then((res) => {
+    //       if (res.data.status === 200) {
+    //         ElMessage({
+    //           message: res.data.message,
+    //           type: 'success',
+    //         })
+    //         emit('getList')
+    //         handleClose()
+    //       }
+    //     })
+    //     break
+    //   case 'StatefulSet':
+    //     // 调用后端接口 创建 statefulSet
+    //     createStatefulSetHandler(getPostData(workLoadItem.value)).then((res) => {
+    //       if (res.data.status === 200) {
+    //         ElMessage({
+    //           message: res.data.message,
+    //           type: 'success',
+    //         })
+    //         emit('getList')
+    //         handleClose()
+    //       }
+    //     })
+    //     break
+    //   case 'DaemonSet':
+    //     // 调用后端接口 创建 DaemonSet
+    //     createDaemonSetHandler(getPostData(workLoadItem.value)).then((res) => {
+    //       if (res.data.status === 200) {
+    //         ElMessage({
+    //           message: res.data.message,
+    //           type: 'success',
+    //         })
+    //         emit('getList')
+    //         handleClose()
+    //       }
+    //     })
+    //     break
+    //   case 'CronJob':
+    //     // 调用后端接口 创建 CronJob
+    //     const sourceData = JSON.parse(JSON.stringify(workLoadItem.value))
+    //     delete sourceData.item.spec.template
+
+    //     createHandler(props.resourceType, sourceData).then((res) => {
+    //       if (res.data.status === 200) {
+    //         ElMessage({
+    //           message: res.data.message,
+    //           type: 'success',
+    //         })
+    //         emit('getList')
+    //         handleClose()
+    //       }
+    //     })
+    //     break
+    //   default:
+    //     ElMessage.error('暂不支持该资源类型')
+    //     break
+    // }
   }
+  // 更新调度管理资源
   const updateItem = () => {
+    // 生成模板数据
     syncToWorkLoadItem()
-    const obj = JSON.parse(JSON.stringify(workLoadItem.value))
-    removeEmptyFieldsDeep(obj)
-    updateDeploymentHandler(obj).then((res) => {
+    const itemForm = JSON.parse(JSON.stringify(workLoadItem.value))
+    // 移除空值字段
+    removeEmptyFieldsDeep(itemForm)
+    // 调用后端接口
+    updateHandler(props.resourceType, itemForm).then((res) => {
       if (res.data.status === 200) {
         ElMessage({
           message: res.data.message,
@@ -177,7 +197,7 @@
     // 同步数据至模板
     syncToWorkLoadItem()
     // 转换模板数据为yaml
-    if (props.resourceType == 'CronJob') {
+    if (props.resourceType == 'cronJob') {
       const sourceData = JSON.parse(JSON.stringify(workLoadItem.value.item))
       delete sourceData.spec.template
       itemOfYaml.value = obj2yaml(getPostData(sourceData))
@@ -216,7 +236,7 @@
       item?.emptyDir?.medium == 'Disk' && delete item.emptyDir.medium
     })
     // cronJob 数据修正
-    if (props.resourceType == 'CronJob') {
+    if (props.resourceType == 'cronJob') {
       workLoadItem.value.item.spec.jobTemplate.spec.template = workLoadItem.value.item.spec.template
     }
   }

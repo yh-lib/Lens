@@ -163,13 +163,17 @@
     workLoadItem.value.item.kind = props.resourceType
     // apiversion
     switch (props.resourceType) {
-      case 'Deployment':
-      case 'StatefulSet':
-      case 'DaemonSet':
+      case 'deployment':
+      case 'statefulSet':
+      case 'daemonSet':
         workLoadItem.value.item.apiVersion = 'apps/v1'
         break
-      case 'CronJob':
+      case 'cronJob':
         workLoadItem.value.item.apiVersion = 'batch/v1'
+        if (props.actionMethod == 'update') {
+          workLoadItem.value.item.spec.template =
+            workLoadItem.value.item.spec.jobTemplate.spec.template
+        }
         break
       default:
         break
@@ -247,7 +251,7 @@
             </el-form-item>
           </el-col>
           <!-- 重启策略 -->
-          <el-col :span="8" v-if="props.resourceType == 'CronJob'">
+          <el-col :span="8" v-if="props.resourceType == 'cronJob'">
             <el-form-item label="重启策略" required>
               <el-select
                 placeholder="请选择重启策略"
@@ -347,7 +351,7 @@
             </el-form-item>
           </el-col>
           <!-- 保留成功的 Job 数量 -->
-          <el-col :span="8" v-if="props.resourceType == 'CronJob'">
+          <el-col :span="8" v-if="props.resourceType == 'cronJob'">
             <el-form-item label="保留成功的 Job 数量">
               <el-input-number
                 :min="1"
@@ -356,13 +360,13 @@
             </el-form-item>
           </el-col>
           <!-- 保留失败的 Job 数量 -->
-          <el-col :span="8" v-if="props.resourceType == 'CronJob'">
+          <el-col :span="8" v-if="props.resourceType == 'cronJob'">
             <el-form-item label="保留失败的 Job 数量">
               <el-input-number :min="1" v-model="workLoadItem.item.spec.failedJobsHistoryLimit" />
             </el-form-item>
           </el-col>
           <!-- 暂停调度 -->
-          <el-col :span="8" v-if="props.resourceType == 'CronJob'">
+          <el-col :span="8" v-if="props.resourceType == 'cronJob'">
             <el-form-item label="暂停调度">
               <el-switch v-model="workLoadItem.item.spec.suspend" />
             </el-form-item>
