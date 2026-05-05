@@ -5,6 +5,7 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import DialogOfItem from '../components/workLoads/DialogOfItem.vue'
   import { deleteCronJobHandler, getCronJobListHandler } from '../../api/cronJob.js'
+  import { getListHandler } from '../../api/generic.js'
 
   // 删除 CronJob
   const deleteItem = (row) => {
@@ -36,7 +37,7 @@
       data.items = []
       return
     }
-    getCronJobListHandler(data.clusterId, data.nameSpace).then((res) => {
+    getListHandler(data.clusterId, data.nameSpace, 'cronJob').then((res) => {
       data.items = res.data.data.items || []
     })
   }

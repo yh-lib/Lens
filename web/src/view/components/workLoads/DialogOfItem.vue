@@ -41,6 +41,7 @@
   const createItem = () => {
     // 同步子组件数据至模板
     syncToWorkLoadItem()
+
     switch (props.resourceType) {
       case 'Deployment':
         // 调用后端接口 创建 Deployment
