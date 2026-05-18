@@ -21,6 +21,7 @@ kubernetes 1.35
 git clone https://github.com/yh-lib/Ks.git
 # 根据需求  编辑 values.yaml
 vim chart/values.yaml
+# 根据实际环境，调整ingress.className。目前支持 ingress-nginx、traefik
 # 安装 release
 helm install ks -n ks .
 ```

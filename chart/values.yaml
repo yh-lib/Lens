@@ -84,6 +84,7 @@ global:
   ingress:
     name: "ingress-ks"
     enabled: true
+    # className: "nginx/traefik"
     className: "nginx"
     annotations: {}
     host: ks.tpass.local
